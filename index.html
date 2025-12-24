@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدیریت خرید</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header-section">
+            <h1>مدیریت خرید</h1>
+            <button type="button" id="hamburgerBtn" class="hamburger-btn" aria-label="Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+        
+        <!-- Hamburger Menu -->
+        <div id="hamburgerMenu" class="hamburger-menu">
+            <div class="menu-header">
+                <h2>منو</h2>
+                <button type="button" id="closeMenuBtn" class="close-menu-btn">×</button>
+            </div>
+            <div class="menu-content">
+                <div class="menu-section">
+                    <h3>عملیات</h3>
+                    <button type="button" id="summaryBtn" class="menu-btn summary-btn">نمایش خلاصه</button>
+                    <button type="button" id="lotteryBtn" class="menu-btn lottery-btn">قرعه‌کشی</button>
+                </div>
+                <div class="menu-section">
+                    <h3>پشتیبان‌گیری</h3>
+                    <button type="button" id="backupPurchasesBtn" class="menu-btn backup-btn">پشتیبان خریدها</button>
+                    <button type="button" id="backupCustomersBtn" class="menu-btn backup-btn">پشتیبان مشتریان</button>
+                </div>
+                <div class="menu-section">
+                    <h3>بازیابی</h3>
+                    <button type="button" id="restorePurchasesBtn" class="menu-btn restore-btn">بازیابی خریدها</button>
+                    <button type="button" id="restoreCustomersBtn" class="menu-btn restore-btn">بازیابی مشتریان</button>
+                </div>
+                <div class="menu-section">
+                    <h3>پایگاه داده</h3>
+                    <button type="button" id="resetBtn" class="menu-btn reset-btn">بازنشانی پایگاه داده</button>
+                </div>
+            </div>
+        </div>
+        <div id="menuBackdrop" class="menu-backdrop" style="display: none;"></div>
+        
+        <div class="form-section">
+            <form id="purchaseForm">
+                <div class="form-group">
+                    <label for="customerName">نام مشتری</label>
+                    <div class="autocomplete-wrapper">
+                        <input 
+                            type="text" 
+                            id="customerName" 
+                            name="customerName" 
+                            placeholder="نام مشتری را وارد کنید"
+                            autocomplete="off"
+                            required
+                        >
+                        <div id="autocompleteDropdown" class="autocomplete-dropdown"></div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="phoneNumber">شماره تماس</label>
+                    <input 
+                        type="tel" 
+                        id="phoneNumber" 
+                        name="phoneNumber" 
+                        placeholder="شماره تماس را وارد کنید"
+                        autocomplete="off"
+                    >
+                </div>
+                <div class="form-group">
+                    <label for="price">مبلغ</label>
+                    <input 
+                        type="text" 
+                        id="price" 
+                        name="price" 
+                        placeholder="مبلغ را وارد کنید (مثال: 1,000)"
+                        required
+                    >
+                </div>
+                <div class="form-group">
+                    <label for="explanation">توضیحات / یادداشت</label>
+                    <input 
+                        type="text" 
+                        id="explanation" 
+                        name="explanation" 
+                        placeholder="توضیحات یا یادداشت را وارد کنید (اختیاری)"
+                        autocomplete="off"
+                    >
+                </div>
+                <div class="form-group checkbox-group">
+                    <label class="checkbox-label">
+                        <input 
+                            type="checkbox" 
+                            id="hasGoods" 
+                            name="hasGoods"
+                        >
+                        <span>این خرید شامل کالا است</span>
+                    </label>
+                </div>
+                <div class="button-group">
+                    <button type="submit" class="submit-btn">افزودن خرید</button>
+                </div>
+            </form>
+            <div id="message" class="message"></div>
+        </div>
+
+        <div id="summaryBackdrop" class="summary-backdrop" style="display: none;"></div>
+        <div id="summarySection" class="summary-section" style="display: none;">
+            <div class="summary-header">
+                <h2>خلاصه خریدهای مشتریان</h2>
+                <button type="button" id="closeSummaryBtn" class="close-btn">×</button>
+            </div>
+            <div class="date-range-filter">
+                <div class="date-range-item">
+                    <label for="summaryFromDate">از تاریخ:</label>
+                    <input type="date" id="summaryFromDate" class="date-input">
+                </div>
+                <div class="date-range-item">
+                    <label for="summaryToDate">تا تاریخ:</label>
+                    <input type="date" id="summaryToDate" class="date-input">
+                </div>
+                <button type="button" id="applySummaryFilter" class="filter-btn">اعمال فیلتر</button>
+                <button type="button" id="clearSummaryFilter" class="clear-filter-btn">پاک کردن</button>
+            </div>
+            <div id="summaryContainer" class="summary-scrollable"></div>
+        </div>
+
+        <div id="lotteryBackdrop" class="summary-backdrop" style="display: none;"></div>
+        <div id="lotteryDialog" class="summary-section" style="display: none;">
+            <div class="summary-header">
+                <h2>نتایج قرعه‌کشی</h2>
+                <button type="button" id="closeLotteryBtn" class="close-btn">×</button>
+            </div>
+            <div class="date-range-filter">
+                <div class="date-range-item">
+                    <label for="lotteryFromDate">از تاریخ:</label>
+                    <input type="date" id="lotteryFromDate" class="date-input">
+                </div>
+                <div class="date-range-item">
+                    <label for="lotteryToDate">تا تاریخ:</label>
+                    <input type="date" id="lotteryToDate" class="date-input">
+                </div>
+                <button type="button" id="applyLotteryFilter" class="filter-btn">اعمال فیلتر</button>
+                <button type="button" id="clearLotteryFilter" class="clear-filter-btn">پاک کردن</button>
+            </div>
+            <div id="lotteryContainer" class="summary-scrollable"></div>
+        </div>
+
+        <div id="resetBackdrop" class="summary-backdrop" style="display: none;"></div>
+        <div id="resetDialog" class="reset-confirmation-dialog" style="display: none;">
+            <div class="reset-dialog-content">
+                <div class="reset-dialog-header">
+                    <h2>⚠️ بازنشانی پایگاه داده</h2>
+                </div>
+                <div class="reset-dialog-body">
+                    <p class="reset-warning">آیا مطمئن هستید که می‌خواهید سوابق خرید را بازنشانی کنید؟</p>
+                    <p class="reset-details">این عمل:</p>
+                    <ul class="reset-list">
+                        <li>تمام سوابق خرید را <strong>حذف</strong> می‌کند</li>
+                        <li style="background-color: #d4edda; border-left-color: #28a745; color: #155724;">تمام اطلاعات مشتریان (نام و شماره تماس) را <strong>حفظ</strong> می‌کند</li>
+                        <li>این عمل <strong>قابل بازگشت نیست</strong></li>
+                    </ul>
+                    <p class="reset-note">⚠️ اطلاعات مشتریان حفظ می‌شود. فقط تاریخچه خریدها حذف می‌شود.</p>
+                </div>
+                <div class="reset-dialog-actions">
+                    <button type="button" id="cancelResetBtn" class="cancel-reset-btn">لغو</button>
+                    <button type="button" id="confirmResetBtn" class="confirm-reset-btn">بله، بازنشانی کن</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="purchases-section">
+            <div class="purchases-list">
+                <h2>خریدهای اخیر</h2>
+                <div id="purchasesContainer" class="purchases-scrollable"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script src="summary.js"></script>
+    <script src="lottery.js"></script>
+    <script src="reset.js"></script>
+    <script src="backup.js"></script>
+    <script src="menu.js"></script>
+</body>
+</html>
