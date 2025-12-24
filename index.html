@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مدیریت خرید</title>
+    <title>مدیریت فروش</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -12,7 +12,7 @@
 <body>
     <div class="container">
         <div class="header-section">
-            <h1>مدیریت خرید</h1>
+            <h1>مدیریت فروش</h1>
             <button type="button" id="hamburgerBtn" class="hamburger-btn" aria-label="Menu">
                 <span></span>
                 <span></span>
@@ -34,12 +34,12 @@
                 </div>
                 <div class="menu-section">
                     <h3>پشتیبان‌گیری</h3>
-                    <button type="button" id="backupPurchasesBtn" class="menu-btn backup-btn">پشتیبان خریدها</button>
+                    <button type="button" id="backupPurchasesBtn" class="menu-btn backup-btn">پشتیبان فروش‌ها</button>
                     <button type="button" id="backupCustomersBtn" class="menu-btn backup-btn">پشتیبان مشتریان</button>
                 </div>
                 <div class="menu-section">
                     <h3>بازیابی</h3>
-                    <button type="button" id="restorePurchasesBtn" class="menu-btn restore-btn">بازیابی خریدها</button>
+                    <button type="button" id="restorePurchasesBtn" class="menu-btn restore-btn">بازیابی فروش‌ها</button>
                     <button type="button" id="restoreCustomersBtn" class="menu-btn restore-btn">بازیابی مشتریان</button>
                 </div>
                 <div class="menu-section">
@@ -66,48 +66,58 @@
                         <div id="autocompleteDropdown" class="autocomplete-dropdown"></div>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label for="phoneNumber">شماره تماس</label>
-                    <input 
-                        type="tel" 
-                        id="phoneNumber" 
-                        name="phoneNumber" 
-                        placeholder="شماره تماس را وارد کنید"
-                        autocomplete="off"
-                    >
-                </div>
-                <div class="form-group">
-                    <label for="price">مبلغ</label>
-                    <input 
-                        type="text" 
-                        id="price" 
-                        name="price" 
-                        placeholder="مبلغ را وارد کنید (مثال: 1,000)"
-                        required
-                    >
-                </div>
-                <div class="form-group">
-                    <label for="explanation">توضیحات / یادداشت</label>
-                    <input 
-                        type="text" 
-                        id="explanation" 
-                        name="explanation" 
-                        placeholder="توضیحات یا یادداشت را وارد کنید (اختیاری)"
-                        autocomplete="off"
-                    >
-                </div>
-                <div class="form-group checkbox-group">
-                    <label class="checkbox-label">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="phoneNumber">شماره تماس</label>
                         <input 
-                            type="checkbox" 
-                            id="hasGoods" 
-                            name="hasGoods"
+                            type="tel" 
+                            id="phoneNumber" 
+                            name="phoneNumber" 
+                            placeholder="شماره تماس را وارد کنید"
+                            autocomplete="off"
                         >
-                        <span>این خرید شامل کالا است</span>
-                    </label>
+                    </div>
+                    <div class="form-group">
+                        <label for="price">مبلغ</label>
+                        <input 
+                            type="text" 
+                            id="price" 
+                            name="price" 
+                            placeholder="مبلغ را وارد کنید (مثال: 1,000)"
+                            required
+                        >
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="explanation">توضیحات / یادداشت</label>
+                        <input 
+                            type="text" 
+                            id="explanation" 
+                            name="explanation" 
+                            placeholder="توضیحات یا یادداشت را وارد کنید (اختیاری)"
+                            autocomplete="off"
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label for="category">دسته‌بندی</label>
+                        <select 
+                            id="category" 
+                            name="category"
+                        >
+                            <option value="">انتخاب کنید</option>
+                            <option value="فیلم و اهنگ">فیلم و اهنگ</option>
+                            <option value="فیلتر شکن">فیلتر شکن</option>
+                            <option value="اپل ایدی">اپل ایدی</option>
+                            <option value="لوازم جانبی">لوازم جانبی</option>
+                            <option value="خدمات اینستاگرام">خدمات اینستاگرام</option>
+                            <option value="قفل گوشی">قفل گوشی</option>
+                            <option value="سایر">سایر</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="button-group">
-                    <button type="submit" class="submit-btn">افزودن خرید</button>
+                    <button type="submit" class="submit-btn">افزودن فروش</button>
                 </div>
             </form>
             <div id="message" class="message"></div>
@@ -116,7 +126,7 @@
         <div id="summaryBackdrop" class="summary-backdrop" style="display: none;"></div>
         <div id="summarySection" class="summary-section" style="display: none;">
             <div class="summary-header">
-                <h2>خلاصه خریدهای مشتریان</h2>
+                <h2>خلاصه فروش‌های مشتریان</h2>
                 <button type="button" id="closeSummaryBtn" class="close-btn">×</button>
             </div>
             <div class="date-range-filter">
@@ -127,6 +137,19 @@
                 <div class="date-range-item">
                     <label for="summaryToDate">تا تاریخ:</label>
                     <input type="date" id="summaryToDate" class="date-input">
+                </div>
+                <div class="date-range-item">
+                    <label for="summaryCategory">دسته‌بندی:</label>
+                    <select id="summaryCategory" class="date-input">
+                        <option value="">همه</option>
+                        <option value="فیلم و اهنگ">فیلم و اهنگ</option>
+                        <option value="فیلتر شکن">فیلتر شکن</option>
+                        <option value="اپل ایدی">اپل ایدی</option>
+                        <option value="لوازم جانبی">لوازم جانبی</option>
+                        <option value="خدمات اینستاگرام">خدمات اینستاگرام</option>
+                        <option value="قفل گوشی">قفل گوشی</option>
+                        <option value="سایر">سایر</option>
+                    </select>
                 </div>
                 <button type="button" id="applySummaryFilter" class="filter-btn">اعمال فیلتر</button>
                 <button type="button" id="clearSummaryFilter" class="clear-filter-btn">پاک کردن</button>
@@ -149,6 +172,19 @@
                     <label for="lotteryToDate">تا تاریخ:</label>
                     <input type="date" id="lotteryToDate" class="date-input">
                 </div>
+                <div class="date-range-item">
+                    <label for="lotteryCategory">دسته‌بندی:</label>
+                    <select id="lotteryCategory" class="date-input">
+                        <option value="">همه</option>
+                        <option value="فیلم و اهنگ">فیلم و اهنگ</option>
+                        <option value="فیلتر شکن">فیلتر شکن</option>
+                        <option value="اپل ایدی">اپل ایدی</option>
+                        <option value="لوازم جانبی">لوازم جانبی</option>
+                        <option value="خدمات اینستاگرام">خدمات اینستاگرام</option>
+                        <option value="قفل گوشی">قفل گوشی</option>
+                        <option value="سایر">سایر</option>
+                    </select>
+                </div>
                 <button type="button" id="applyLotteryFilter" class="filter-btn">اعمال فیلتر</button>
                 <button type="button" id="clearLotteryFilter" class="clear-filter-btn">پاک کردن</button>
             </div>
@@ -162,14 +198,14 @@
                     <h2>⚠️ بازنشانی پایگاه داده</h2>
                 </div>
                 <div class="reset-dialog-body">
-                    <p class="reset-warning">آیا مطمئن هستید که می‌خواهید سوابق خرید را بازنشانی کنید؟</p>
+                    <p class="reset-warning">آیا مطمئن هستید که می‌خواهید سوابق فروش را بازنشانی کنید؟</p>
                     <p class="reset-details">این عمل:</p>
                     <ul class="reset-list">
-                        <li>تمام سوابق خرید را <strong>حذف</strong> می‌کند</li>
+                        <li>تمام سوابق فروش را <strong>حذف</strong> می‌کند</li>
                         <li style="background-color: #d4edda; border-left-color: #28a745; color: #155724;">تمام اطلاعات مشتریان (نام و شماره تماس) را <strong>حفظ</strong> می‌کند</li>
                         <li>این عمل <strong>قابل بازگشت نیست</strong></li>
                     </ul>
-                    <p class="reset-note">⚠️ اطلاعات مشتریان حفظ می‌شود. فقط تاریخچه خریدها حذف می‌شود.</p>
+                    <p class="reset-note">⚠️ اطلاعات مشتریان حفظ می‌شود. فقط تاریخچه فروش‌ها حذف می‌شود.</p>
                 </div>
                 <div class="reset-dialog-actions">
                     <button type="button" id="cancelResetBtn" class="cancel-reset-btn">لغو</button>
@@ -180,7 +216,7 @@
 
         <div class="purchases-section">
             <div class="purchases-list">
-                <h2>خریدهای اخیر</h2>
+                <h2>فروش‌های اخیر</h2>
                 <div id="purchasesContainer" class="purchases-scrollable"></div>
             </div>
         </div>

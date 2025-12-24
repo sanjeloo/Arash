@@ -219,6 +219,17 @@ h1 {
     position: relative;
 }
 
+.form-row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 0;
+}
+
+.form-row .form-group {
+    flex: 1;
+    margin-bottom: 25px;
+}
+
 .autocomplete-wrapper {
     position: relative;
 }
@@ -232,7 +243,8 @@ label {
 }
 
 input[type="text"],
-input[type="tel"] {
+input[type="tel"],
+select {
     width: 100%;
     padding: 12px 15px;
     border: 2px solid #e0e0e0;
@@ -241,12 +253,24 @@ input[type="tel"] {
     transition: all 0.3s ease;
     font-family: 'Vazirmatn', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     outline: none;
+    background-color: white;
+    cursor: pointer;
 }
 
 input[type="text"]:focus,
-input[type="tel"]:focus {
+input[type="tel"]:focus,
+select:focus {
     border-color: #667eea;
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23667eea' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    padding-left: 15px;
+    padding-right: 40px;
 }
 
 .button-group {
@@ -351,25 +375,40 @@ input[type="tel"]:focus {
 }
 
 .purchases-list {
-    border-top: 2px solid #e0e0e0;
-    padding-top: 30px;
+    border-top: 3px solid #e8eaf6;
+    padding-top: 35px;
     display: flex;
     flex-direction: column;
     min-height: 500px;
     overflow: visible;
+    background: linear-gradient(to bottom, transparent, #f8f9ff);
+    margin-top: 20px;
+    padding-left: 20px;
+    padding-right: 20px;
+    border-radius: 15px;
 }
 
 .purchases-list h2 {
     color: #333;
-    margin-bottom: 15px;
-    font-size: 1.3em;
+    margin-bottom: 25px;
+    font-size: 1.5em;
     flex-shrink: 0;
+    font-weight: 700;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-align: center;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #e8eaf6;
 }
 
 .purchases-scrollable {
     overflow: visible;
     padding-right: 10px;
     min-height: 450px;
+    display: grid;
+    gap: 15px;
 }
 
 /* Custom scrollbar styling */
@@ -392,37 +431,109 @@ input[type="tel"]:focus {
 }
 
 .purchase-item {
-    background: #f8f9fa;
-    padding: 12px 15px;
-    border-radius: 8px;
-    margin-bottom: 10px;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+    padding: 20px 25px;
+    border-radius: 15px;
+    margin-bottom: 0;
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     font-family: 'Vazirmatn', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    border: 2px solid #e8eaf6;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.08);
+    position: relative;
+    overflow: hidden;
+}
+
+.purchase-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* Category-specific left border accent */
+.purchase-item[data-category-color]::before {
+    background: var(--category-gradient, linear-gradient(135deg, #667eea 0%, #764ba2 100%));
+}
+
+.purchase-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+    border-color: #667eea;
+}
+
+/* Category-specific hover border color */
+.purchase-item[data-category-color]:hover {
+    border-color: var(--category-color, #667eea);
+    box-shadow: 0 8px 25px var(--category-shadow, rgba(102, 126, 234, 0.15));
+}
+
+.purchase-item:hover::before {
+    opacity: 1;
 }
 
 .purchase-info {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 8px;
+    padding-left: 10px;
+}
+
+.purchase-info > span {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+.purchase-info strong {
+    color: #2d3748;
+    font-size: 16px;
+    font-weight: 700;
+    margin-left: 5px;
+}
+
+.purchase-info > span {
+    color: #4a5568;
 }
 
 .purchase-explanation {
     font-size: 13px;
-    color: #666;
+    color: #718096;
     font-style: italic;
-    margin-top: 4px;
-    padding-left: 5px;
-    border-left: 2px solid #667eea;
+    margin-top: 8px;
+    padding: 8px 12px;
+    padding-right: 15px;
+    border-right: 3px solid #667eea;
+    background: linear-gradient(to left, rgba(102, 126, 234, 0.05), transparent);
+    border-radius: 5px;
+    margin-right: 5px;
+    line-height: 1.5;
 }
 
 .purchase-item.has-goods {
-    background: #fff3cd;
+    background: linear-gradient(135deg, #fff8e1 0%, #fff3cd 100%);
     border: 2px solid #ffc107;
-    box-shadow: 0 2px 8px rgba(255, 193, 7, 0.2);
+    box-shadow: 0 4px 15px rgba(255, 193, 7, 0.25);
+}
+
+.purchase-item.has-goods::before {
+    background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+}
+
+.purchase-item.has-goods:hover {
+    box-shadow: 0 8px 25px rgba(255, 193, 7, 0.35);
+    border-color: #ff9800;
 }
 
 .purchase-item span {
@@ -455,32 +566,96 @@ input[type="tel"]:focus {
 
 .goods-badge {
     display: inline-block;
-    background: #ffc107;
+    background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
     color: #856404;
-    padding: 4px 10px;
-    border-radius: 12px;
+    padding: 6px 14px;
+    border-radius: 20px;
     font-size: 12px;
-    font-weight: 600;
-    margin-left: 8px;
+    font-weight: 700;
+    margin-left: 10px;
+    box-shadow: 0 2px 6px rgba(255, 193, 7, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
+    letter-spacing: 0.3px;
+}
+
+.editable-category {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.editable-category:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.4);
+}
+
+.category-edit-select {
+    font-family: 'Vazirmatn', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    outline: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2385604' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    padding-right: 15px;
+    padding-left: 40px;
 }
 
 .purchase-item .price-container {
     display: flex;
     align-items: center;
+    min-width: 120px;
+    justify-content: flex-end;
+}
+
+.delete-purchase-btn {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    border: none;
+    border-radius: 10px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.3);
+    flex-shrink: 0;
+}
+
+.delete-purchase-btn:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+}
+
+.delete-purchase-btn:active {
+    transform: translateY(0) scale(0.98);
 }
 
 .purchase-item .price {
-    font-weight: 600;
+    font-weight: 700;
     color: #667eea;
     cursor: pointer;
-    transition: all 0.2s ease;
-    padding: 4px 8px;
-    border-radius: 5px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 10px 18px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    border: 2px solid rgba(102, 126, 234, 0.2);
+    font-size: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 100px;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
 }
 
 .purchase-item .price:hover {
-    background-color: #f0f4ff;
-    transform: scale(1.05);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+    border-color: #667eea;
 }
 
 .price-edit-input {

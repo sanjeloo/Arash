@@ -200,7 +200,7 @@ document.getElementById('purchaseForm').addEventListener('submit', function(e) {
     const priceValue = document.getElementById('price').value.replace(/,/g, '');
     const price = parseInt(priceValue, 10);
     const explanation = document.getElementById('explanation').value.trim();
-    const hasGoods = document.getElementById('hasGoods').checked;
+    const category = document.getElementById('category').value.trim();
 
     // Validation
     if (!customerName) {
@@ -224,7 +224,7 @@ document.getElementById('purchaseForm').addEventListener('submit', function(e) {
             phoneNumber: phoneNumber || '',
             price: price,
             explanation: explanation || '',
-            hasGoods: hasGoods,
+            category: category || '',
             date: new Date().toISOString()
         };
 
@@ -245,7 +245,7 @@ document.getElementById('purchaseForm').addEventListener('submit', function(e) {
             const customerRequest = customerStore.put(customerData);
             
             customerRequest.onsuccess = () => {
-                showMessage('خرید با موفقیت افزوده شد!', 'success');
+                showMessage('فروش با موفقیت افزوده شد!', 'success');
                 document.getElementById('purchaseForm').reset();
                 loadPurchases();
                 // Focus back on customer name input
@@ -257,7 +257,7 @@ document.getElementById('purchaseForm').addEventListener('submit', function(e) {
             customerRequest.onerror = () => {
                 console.error('Error saving customer info');
                 // Still show success for purchase even if customer save fails
-                showMessage('خرید با موفقیت افزوده شد!', 'success');
+                showMessage('فروش با موفقیت افزوده شد!', 'success');
                 document.getElementById('purchaseForm').reset();
                 loadPurchases();
                 // Focus back on customer name input
@@ -268,7 +268,7 @@ document.getElementById('purchaseForm').addEventListener('submit', function(e) {
         };
 
         purchaseRequest.onerror = () => {
-            showMessage('خطا در افزودن خرید به پایگاه داده', 'error');
+            showMessage('خطا در افزودن فروش به پایگاه داده', 'error');
         };
     } else {
         showMessage('پایگاه داده آماده نیست. لطفاً صفحه را رفرش کنید.', 'error');
@@ -355,6 +355,93 @@ function attachPriceEditListeners() {
     });
 }
 
+// Attach category edit event listeners
+function attachCategoryEditListeners() {
+    const editableCategories = document.querySelectorAll('.editable-category');
+    
+    editableCategories.forEach(categoryElement => {
+        categoryElement.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const purchaseId = parseInt(this.getAttribute('data-purchase-id'));
+            const currentCategory = this.getAttribute('data-category') || '';
+            const categorySelect = document.querySelector(`.category-edit-select[data-purchase-id="${purchaseId}"]`);
+            
+            if (!categorySelect) return;
+            
+            // Category color mapping for select dropdown
+            const categoryColors = {
+                'فیلم و اهنگ': { gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' },
+                'فیلتر شکن': { gradient: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)', color: 'white' },
+                'اپل ایدی': { gradient: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', color: 'white' },
+                'لوازم جانبی': { gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: 'white' },
+                'خدمات اینستاگرام': { gradient: 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)', color: 'white' },
+                'قفل گوشی': { gradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', color: 'white' },
+                'سایر': { gradient: 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)', color: 'white' }
+            };
+            const selectedColor = currentCategory && categoryColors[currentCategory] 
+                ? categoryColors[currentCategory] 
+                : { gradient: 'linear-gradient(135deg, #e2e8f0 0%, #cbd5e0 100%)', color: '#718096' };
+            
+            // Hide category badge, show select
+            this.style.display = 'none';
+            categorySelect.value = currentCategory;
+            categorySelect.style.display = 'inline-block';
+            categorySelect.style.padding = '6px 14px';
+            categorySelect.style.border = '2px solid transparent';
+            categorySelect.style.borderRadius = '20px';
+            categorySelect.style.fontSize = '12px';
+            categorySelect.style.fontWeight = '700';
+            categorySelect.style.background = selectedColor.gradient;
+            categorySelect.style.color = selectedColor.color;
+            categorySelect.style.cursor = 'pointer';
+            categorySelect.style.minWidth = '180px';
+            categorySelect.style.textShadow = selectedColor.color === 'white' ? '0 1px 2px rgba(0, 0, 0, 0.2)' : 'none';
+            categorySelect.focus();
+            
+            // Update select style when category changes
+            const updateSelectStyle = () => {
+                const newCategory = categorySelect.value || '';
+                const newColor = newCategory && categoryColors[newCategory] 
+                    ? categoryColors[newCategory] 
+                    : { gradient: 'linear-gradient(135deg, #e2e8f0 0%, #cbd5e0 100%)', color: '#718096' };
+                categorySelect.style.background = newColor.gradient;
+                categorySelect.style.color = newColor.color;
+                categorySelect.style.textShadow = newColor.color === 'white' ? '0 1px 2px rgba(0, 0, 0, 0.2)' : 'none';
+            };
+            
+            // Handle change event
+            const saveCategory = () => {
+                const newCategory = categorySelect.value || '';
+                updatePurchaseCategory(purchaseId, newCategory);
+            };
+            
+            // Update style on change, then save
+            categorySelect.addEventListener('change', function() {
+                updateSelectStyle();
+                saveCategory();
+            }, { once: true });
+            
+            // Handle blur (click outside)
+            categorySelect.addEventListener('blur', function() {
+                setTimeout(() => {
+                    if (categorySelect.style.display !== 'none') {
+                        saveCategory();
+                    }
+                }, 200);
+            }, { once: true });
+            
+            // Handle Escape key
+            categorySelect.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    categorySelect.style.display = 'none';
+                    categoryElement.style.display = 'inline-block';
+                }
+            }, { once: true });
+        });
+    });
+}
+
 // Update purchase price in database
 function updatePurchasePrice(purchaseId, newPrice) {
     if (!db) {
@@ -369,7 +456,7 @@ function updatePurchasePrice(purchaseId, newPrice) {
     getRequest.onsuccess = () => {
         const purchase = getRequest.result;
         if (!purchase) {
-        showMessage('خرید یافت نشد', 'error');
+        showMessage('فروش یافت نشد', 'error');
         return;
     }
     
@@ -394,6 +481,83 @@ function updatePurchasePrice(purchaseId, newPrice) {
     };
 }
 
+// Update purchase category in database
+function updatePurchaseCategory(purchaseId, newCategory) {
+    if (!db) {
+        showMessage('Database not ready', 'error');
+        return;
+    }
+    
+    const transaction = db.transaction([STORE_NAME], 'readwrite');
+    const objectStore = transaction.objectStore(STORE_NAME);
+    const getRequest = objectStore.get(purchaseId);
+    
+    getRequest.onsuccess = () => {
+        const purchase = getRequest.result;
+        if (!purchase) {
+            showMessage('فروش یافت نشد', 'error');
+            return;
+        }
+        
+        // Update category
+        purchase.category = newCategory;
+        
+        // Update in database
+        const updateRequest = objectStore.put(purchase);
+        
+        updateRequest.onsuccess = () => {
+            showMessage('دسته‌بندی با موفقیت به‌روزرسانی شد!', 'success');
+            loadPurchases(); // Reload to show updated category
+        };
+        
+        updateRequest.onerror = () => {
+            showMessage('خطا در به‌روزرسانی دسته‌بندی', 'error');
+        };
+    };
+    
+    getRequest.onerror = () => {
+        showMessage('Error loading purchase', 'error');
+    };
+}
+
+// Attach delete button event listeners
+function attachDeleteListeners() {
+    const deleteButtons = document.querySelectorAll('.delete-purchase-btn');
+    
+    deleteButtons.forEach(deleteBtn => {
+        deleteBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const purchaseId = parseInt(this.getAttribute('data-purchase-id'));
+            
+            // Show confirmation dialog
+            if (confirm('آیا مطمئن هستید که می‌خواهید این فروش را حذف کنید؟\n\nاین عمل قابل بازگشت نیست.')) {
+                deletePurchase(purchaseId);
+            }
+        });
+    });
+}
+
+// Delete purchase from database
+function deletePurchase(purchaseId) {
+    if (!db) {
+        showMessage('Database not ready', 'error');
+        return;
+    }
+    
+    const transaction = db.transaction([STORE_NAME], 'readwrite');
+    const objectStore = transaction.objectStore(STORE_NAME);
+    const deleteRequest = objectStore.delete(purchaseId);
+    
+    deleteRequest.onsuccess = () => {
+        showMessage('فروش با موفقیت حذف شد!', 'success');
+        loadPurchases(); // Reload to show updated list
+    };
+    
+    deleteRequest.onerror = () => {
+        showMessage('خطا در حذف فروش', 'error');
+    };
+}
+
 // Load and display purchases
 function loadPurchases() {
     if (!db) return;
@@ -407,37 +571,134 @@ function loadPurchases() {
         const container = document.getElementById('purchasesContainer');
         
         if (purchases.length === 0) {
-            container.innerHTML = '<p style="color: #999; text-align: center;">هنوز خریدی ثبت نشده است</p>';
+            container.innerHTML = '<div style="text-align: center; padding: 60px 20px;"><div style="font-size: 64px; margin-bottom: 20px; opacity: 0.3;">📋</div><p style="color: #a0aec0; font-size: 16px; font-weight: 500;">هنوز فروشی ثبت نشده است</p><p style="color: #cbd5e0; font-size: 14px; margin-top: 8px;">برای شروع، اولین فروش را اضافه کنید</p></div>';
             return;
         }
 
         // Sort by date (newest first)
         purchases.sort((a, b) => new Date(b.date) - new Date(a.date));
         
+        // Category emoji mapping
+        const categoryEmojis = {
+            'فیلم و اهنگ': '🎬',
+            'فیلتر شکن': '🔒',
+            'اپل ایدی': '🍎',
+            'لوازم جانبی': '📱',
+            'خدمات اینستاگرام': '📸',
+            'قفل گوشی': '🔓',
+            'سایر': '📦'
+        };
+
+        // Category color mapping
+        const categoryColors = {
+            'فیلم و اهنگ': {
+                gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                color: '#4c51bf',
+                shadow: 'rgba(102, 126, 234, 0.3)'
+            },
+            'فیلتر شکن': {
+                gradient: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)',
+                color: '#0e7490',
+                shadow: 'rgba(6, 182, 212, 0.3)'
+            },
+            'اپل ایدی': {
+                gradient: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                color: '#991b1b',
+                shadow: 'rgba(239, 68, 68, 0.3)'
+            },
+            'لوازم جانبی': {
+                gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                color: '#047857',
+                shadow: 'rgba(16, 185, 129, 0.3)'
+            },
+            'خدمات اینستاگرام': {
+                gradient: 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)',
+                color: '#9f1239',
+                shadow: 'rgba(236, 72, 153, 0.3)'
+            },
+            'قفل گوشی': {
+                gradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                color: '#92400e',
+                shadow: 'rgba(245, 158, 11, 0.3)'
+            },
+            'سایر': {
+                gradient: 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)',
+                color: '#374151',
+                shadow: 'rgba(107, 114, 128, 0.3)'
+            }
+        };
+
         container.innerHTML = purchases.map(purchase => {
             const date = new Date(purchase.date).toLocaleDateString();
             const formattedPrice = Math.round(purchase.price).toLocaleString('en-US');
             const phoneDisplay = purchase.phoneNumber ? ` - ${purchase.phoneNumber}` : '';
-            const hasGoods = purchase.hasGoods || false;
-            const goodsBadge = hasGoods ? '<span class="goods-badge">📦 کالا</span>' : '';
-            const itemClass = hasGoods ? 'purchase-item has-goods' : 'purchase-item';
+            const category = purchase.category || '';
+            const categoryEmoji = category ? (categoryEmojis[category] || '📦') : '';
+            const categoryColor = category ? categoryColors[category] : null;
+            const categoryBadge = category 
+                ? `<span class="goods-badge editable-category" data-category="${category}" data-purchase-id="${purchase.id}" style="background: ${categoryColor.gradient}; color: white; box-shadow: 0 2px 6px ${categoryColor.shadow}; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);">${categoryEmoji} ${category}</span>` 
+                : `<span class="goods-badge editable-category" data-category="" data-purchase-id="${purchase.id}" style="background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e0 100%); color: #718096; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);">🏷️ بدون دسته‌بندی</span>`;
+            const itemClass = category ? 'purchase-item has-goods' : 'purchase-item';
+            // Extract colors from gradient for row styling
+            let rowStyle = '';
+            let dataAttributes = '';
+            if (category && categoryColor) {
+                // Extract hex colors from gradient
+                const color1 = categoryColor.gradient.match(/#[0-9a-fA-F]{6}/g)?.[0] || '#667eea';
+                const color2 = categoryColor.gradient.match(/#[0-9a-fA-F]{6}/g)?.[1] || '#764ba2';
+                // Create semi-transparent background and colored border
+                rowStyle = `background: linear-gradient(135deg, ${color1}15 0%, ${color2}15 100%); border: 2px solid ${color1}; box-shadow: 0 2px 8px ${categoryColor.shadow}; --category-color: ${color1}; --category-gradient: ${categoryColor.gradient}; --category-shadow: ${categoryColor.shadow};`;
+                // Add data attribute for CSS styling
+                dataAttributes = `data-category-color="${color1}"`;
+            }
             const explanationDisplay = purchase.explanation ? `<div class="purchase-explanation">${purchase.explanation}</div>` : '';
+            const dateParts = date.split('/');
+            const formattedDate = dateParts.length === 3 ? `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}` : date;
             return `
-                <div class="${itemClass}" data-purchase-id="${purchase.id}">
+                <div class="${itemClass}" data-purchase-id="${purchase.id}" style="${rowStyle}" ${dataAttributes}>
                     <div class="purchase-info">
-                        <span><strong>${purchase.customerName}</strong>${phoneDisplay} - ${date} ${goodsBadge}</span>
+                        <span>
+                            <strong>${purchase.customerName}</strong>
+                            ${phoneDisplay ? `<span style="color: #718096; font-size: 14px;">${phoneDisplay}</span>` : ''}
+                            <span style="color: #a0aec0; font-size: 13px; margin: 0 8px;">•</span>
+                            <span style="color: #718096; font-size: 14px;">📅 ${formattedDate}</span>
+                        </span>
+                        <span style="margin-top: 8px; display: flex; align-items: center; gap: 8px;">
+                            ${categoryBadge}
+                            <select class="category-edit-select" data-purchase-id="${purchase.id}" style="display: none;">
+                                <option value="">بدون دسته‌بندی</option>
+                                <option value="فیلم و اهنگ">🎬 فیلم و اهنگ</option>
+                                <option value="فیلتر شکن">🔒 فیلتر شکن</option>
+                                <option value="اپل ایدی">🍎 اپل ایدی</option>
+                                <option value="لوازم جانبی">📱 لوازم جانبی</option>
+                                <option value="خدمات اینستاگرام">📸 خدمات اینستاگرام</option>
+                                <option value="قفل گوشی">🔓 قفل گوشی</option>
+                                <option value="سایر">📦 سایر</option>
+                            </select>
+                        </span>
                         ${explanationDisplay}
                     </div>
-                    <span class="price-container">
-                        <span class="price editable-price" data-price="${purchase.price}" data-purchase-id="${purchase.id}">$${formattedPrice}</span>
-                        <input type="text" class="price-edit-input" data-purchase-id="${purchase.id}" value="${purchase.price}" style="display: none;">
-                    </span>
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <span class="price-container">
+                            <span class="price editable-price" data-price="${purchase.price}" data-purchase-id="${purchase.id}">$${formattedPrice}</span>
+                            <input type="text" class="price-edit-input" data-purchase-id="${purchase.id}" value="${purchase.price}" style="display: none;">
+                        </span>
+                        <button class="delete-purchase-btn" data-purchase-id="${purchase.id}" title="حذف فروش" aria-label="حذف فروش">
+                            🗑️
+                        </button>
+                    </div>
                 </div>
             `;
         }).join('');
         
         // Add click event listeners for price editing
         attachPriceEditListeners();
+        
+        // Add click event listeners for category editing
+        attachCategoryEditListeners();
+        
+        // Add click event listeners for delete buttons
+        attachDeleteListeners();
     };
 }
 

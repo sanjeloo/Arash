@@ -34,7 +34,7 @@ function confirmReset() {
         const clearRequest = objectStore.clear();
         
         clearRequest.onsuccess = () => {
-            showMessage('سوابق خرید با موفقیت بازنشانی شد! اطلاعات مشتریان حفظ شد.', 'success');
+            showMessage('سوابق فروش با موفقیت بازنشانی شد! اطلاعات مشتریان حفظ شد.', 'success');
             // Reload purchases list
             if (typeof loadPurchases === 'function') {
                 loadPurchases();
@@ -47,7 +47,7 @@ function confirmReset() {
         
         clearRequest.onerror = (event) => {
             console.error('Error clearing purchases:', event.target.error);
-            showMessage('خطا در بازنشانی خریدها. لطفاً دوباره تلاش کنید.', 'error');
+            showMessage('خطا در بازنشانی فروش‌ها. لطفاً دوباره تلاش کنید.', 'error');
         };
     } catch (error) {
         console.error('Error in confirmReset:', error);

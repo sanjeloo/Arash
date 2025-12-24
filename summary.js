@@ -1,33 +1,43 @@
 // Customer Purchase Summary functionality
 // Note: STORE_NAME and db are defined in script.js and accessible globally
 
-// Filter purchases by date range
-function filterPurchasesByDateRange(purchases, fromDate, toDate) {
-    if (!fromDate && !toDate) {
-        return purchases;
+// Filter purchases by date range and category
+function filterPurchasesByDateRange(purchases, fromDate, toDate, category) {
+    let filtered = purchases;
+    
+    // Filter by date range
+    if (fromDate || toDate) {
+        filtered = filtered.filter(purchase => {
+            const purchaseDate = new Date(purchase.date);
+            purchaseDate.setHours(0, 0, 0, 0);
+            
+            if (fromDate && toDate) {
+                const from = new Date(fromDate);
+                from.setHours(0, 0, 0, 0);
+                const to = new Date(toDate);
+                to.setHours(23, 59, 59, 999);
+                return purchaseDate >= from && purchaseDate <= to;
+            } else if (fromDate) {
+                const from = new Date(fromDate);
+                from.setHours(0, 0, 0, 0);
+                return purchaseDate >= from;
+            } else if (toDate) {
+                const to = new Date(toDate);
+                to.setHours(23, 59, 59, 999);
+                return purchaseDate <= to;
+            }
+            return true;
+        });
     }
     
-    return purchases.filter(purchase => {
-        const purchaseDate = new Date(purchase.date);
-        purchaseDate.setHours(0, 0, 0, 0);
-        
-        if (fromDate && toDate) {
-            const from = new Date(fromDate);
-            from.setHours(0, 0, 0, 0);
-            const to = new Date(toDate);
-            to.setHours(23, 59, 59, 999);
-            return purchaseDate >= from && purchaseDate <= to;
-        } else if (fromDate) {
-            const from = new Date(fromDate);
-            from.setHours(0, 0, 0, 0);
-            return purchaseDate >= from;
-        } else if (toDate) {
-            const to = new Date(toDate);
-            to.setHours(23, 59, 59, 999);
-            return purchaseDate <= to;
-        }
-        return true;
-    });
+    // Filter by category
+    if (category && category.trim() !== '') {
+        filtered = filtered.filter(purchase => {
+            return purchase.category === category;
+        });
+    }
+    
+    return filtered;
 }
 
 // Show customer purchase summary
@@ -55,10 +65,11 @@ function showSummary() {
             console.log('=== Request successful ===');
             let purchases = request.result;
             
-            // Apply date range filter
+            // Apply date range and category filters
             const fromDate = document.getElementById('summaryFromDate')?.value || '';
             const toDate = document.getElementById('summaryToDate')?.value || '';
-            purchases = filterPurchasesByDateRange(purchases, fromDate, toDate);
+            const category = document.getElementById('summaryCategory')?.value || '';
+            purchases = filterPurchasesByDateRange(purchases, fromDate, toDate, category);
             console.log('Purchases retrieved:', purchases);
             console.log('Number of purchases:', purchases.length);
             console.log('First purchase sample:', purchases[0]);
@@ -76,7 +87,7 @@ function showSummary() {
             
             if (purchases.length === 0) {
                 console.log('No purchases found');
-                summaryContainer.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">خریدی برای خلاصه‌سازی وجود ندارد</p>';
+                summaryContainer.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">فروشی برای خلاصه‌سازی وجود ندارد</p>';
                 return;
             }
 
@@ -116,7 +127,7 @@ function showSummary() {
             
             if (summaryArray.length === 0) {
                 console.error('Summary array is empty after processing');
-                summaryContainer.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">خرید معتبری برای خلاصه‌سازی وجود ندارد</p>';
+                summaryContainer.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">فروش معتبری برای خلاصه‌سازی وجود ندارد</p>';
                 return;
             }
             
@@ -130,7 +141,7 @@ function showSummary() {
             console.log('Total count:', totalCount);
 
             // Generate table HTML
-            let tableHTML = '<table class="summary-table"><thead><tr><th>نام مشتری</th><th style="text-align: center;">تعداد خرید</th><th style="text-align: right;">مبلغ کل</th></tr></thead><tbody>';
+            let tableHTML = '<table class="summary-table"><thead><tr><th>نام مشتری</th><th style="text-align: center;">تعداد فروش</th><th style="text-align: right;">مبلغ کل</th></tr></thead><tbody>';
 
             console.log('Generating table rows for', summaryArray.length, 'customers');
             summaryArray.forEach((customer, index) => {
@@ -171,7 +182,7 @@ function showSummary() {
         request.onerror = (event) => {
             console.error('=== Request error ===');
             console.error('Error loading purchases:', event.target.error);
-            showMessage('خطا در بارگذاری خریدها برای خلاصه', 'error');
+            showMessage('خطا در بارگذاری فروش‌ها برای خلاصه', 'error');
         };
     } catch (error) {
         console.error('=== Exception in showSummary ===');
@@ -233,6 +244,7 @@ function initSummary() {
         clearFilterBtn.addEventListener('click', function() {
             document.getElementById('summaryFromDate').value = '';
             document.getElementById('summaryToDate').value = '';
+            document.getElementById('summaryCategory').value = '';
             showSummary();
         });
     }

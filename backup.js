@@ -27,15 +27,15 @@ function backupPurchases() {
             document.body.removeChild(purchaseLink);
             URL.revokeObjectURL(purchaseUrl);
 
-            showMessage('پشتیبان‌گیری خریدها با موفقیت انجام شد!', 'success');
+            showMessage('پشتیبان‌گیری فروش‌ها با موفقیت انجام شد!', 'success');
         };
 
         purchaseRequest.onerror = () => {
-            showMessage('خطا در پشتیبان‌گیری داده‌های خرید', 'error');
+            showMessage('خطا در پشتیبان‌گیری داده‌های فروش', 'error');
         };
     } catch (error) {
         console.error('Error in backupPurchases:', error);
-        showMessage('خطا در ایجاد پشتیبان خریدها. لطفاً دوباره تلاش کنید.', 'error');
+        showMessage('خطا در ایجاد پشتیبان فروش‌ها. لطفاً دوباره تلاش کنید.', 'error');
     }
 }
 
@@ -80,7 +80,7 @@ function backupCustomers() {
 
 // Restore purchases from JSON file
 function restorePurchases() {
-    if (!confirm('بازیابی خریدها تمام سوابق خرید موجود را جایگزین می‌کند. آیا مطمئن هستید که می‌خواهید ادامه دهید؟')) {
+    if (!confirm('بازیابی فروش‌ها تمام سوابق فروش موجود را جایگزین می‌کند. آیا مطمئن هستید که می‌خواهید ادامه دهید؟')) {
         return;
     }
 
@@ -100,7 +100,7 @@ function restorePurchases() {
                 const purchases = JSON.parse(event.target.result);
                 
                 if (!Array.isArray(purchases)) {
-                    showMessage('فرمت فایل پشتیبان خریدها نامعتبر است', 'error');
+                    showMessage('فرمت فایل پشتیبان فروش‌ها نامعتبر است', 'error');
                     return;
                 }
 
@@ -116,7 +116,7 @@ function restorePurchases() {
                         let errors = 0;
                         
                         if (purchases.length === 0) {
-                            showMessage('خریدها بازیابی شد (فایل خالی بود). صفحه رفرش می‌شود...', 'success');
+                            showMessage('فروش‌ها بازیابی شد (فایل خالی بود). صفحه رفرش می‌شود...', 'success');
                             setTimeout(() => {
                                 window.location.reload();
                             }, 1500);
@@ -129,12 +129,12 @@ function restorePurchases() {
                                 completed++;
                                 if (completed + errors === purchases.length) {
                                     if (errors === 0) {
-                                        showMessage('خریدها با موفقیت بازیابی شد! صفحه رفرش می‌شود...', 'success');
+                                        showMessage('فروش‌ها با موفقیت بازیابی شد! صفحه رفرش می‌شود...', 'success');
                                         setTimeout(() => {
                                             window.location.reload();
                                         }, 1500);
                                     } else {
-                                        showMessage(`خریدها با ${errors} خطا بازیابی شد. صفحه رفرش می‌شود...`, 'error');
+                                        showMessage(`فروش‌ها با ${errors} خطا بازیابی شد. صفحه رفرش می‌شود...`, 'error');
                                         setTimeout(() => {
                                             window.location.reload();
                                         }, 1500);
@@ -145,12 +145,12 @@ function restorePurchases() {
                                 errors++;
                                 if (completed + errors === purchases.length) {
                                     if (errors === 0) {
-                                        showMessage('خریدها با موفقیت بازیابی شد! صفحه رفرش می‌شود...', 'success');
+                                        showMessage('فروش‌ها با موفقیت بازیابی شد! صفحه رفرش می‌شود...', 'success');
                                         setTimeout(() => {
                                             window.location.reload();
                                         }, 1500);
                                     } else {
-                                        showMessage(`خریدها با ${errors} خطا بازیابی شد. صفحه رفرش می‌شود...`, 'error');
+                                        showMessage(`فروش‌ها با ${errors} خطا بازیابی شد. صفحه رفرش می‌شود...`, 'error');
                                         setTimeout(() => {
                                             window.location.reload();
                                         }, 1500);
@@ -164,7 +164,7 @@ function restorePurchases() {
                 }
             } catch (error) {
                 console.error('Error parsing purchases file:', error);
-                showMessage('خطا در خواندن فایل پشتیبان خریدها. فرمت JSON نامعتبر است.', 'error');
+                showMessage('خطا در خواندن فایل پشتیبان فروش‌ها. فرمت JSON نامعتبر است.', 'error');
             }
         };
         reader.readAsText(file);

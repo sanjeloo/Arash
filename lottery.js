@@ -1,33 +1,43 @@
 // Lottery functionality
 // Note: customerDb, CUSTOMER_DB_NAME, CUSTOMER_STORE_NAME are defined in script.js
 
-// Filter purchases by date range
-function filterPurchasesByDateRange(purchases, fromDate, toDate) {
-    if (!fromDate && !toDate) {
-        return purchases;
+// Filter purchases by date range and category
+function filterPurchasesByDateRange(purchases, fromDate, toDate, category) {
+    let filtered = purchases;
+    
+    // Filter by date range
+    if (fromDate || toDate) {
+        filtered = filtered.filter(purchase => {
+            const purchaseDate = new Date(purchase.date);
+            purchaseDate.setHours(0, 0, 0, 0);
+            
+            if (fromDate && toDate) {
+                const from = new Date(fromDate);
+                from.setHours(0, 0, 0, 0);
+                const to = new Date(toDate);
+                to.setHours(23, 59, 59, 999);
+                return purchaseDate >= from && purchaseDate <= to;
+            } else if (fromDate) {
+                const from = new Date(fromDate);
+                from.setHours(0, 0, 0, 0);
+                return purchaseDate >= from;
+            } else if (toDate) {
+                const to = new Date(toDate);
+                to.setHours(23, 59, 59, 999);
+                return purchaseDate <= to;
+            }
+            return true;
+        });
     }
     
-    return purchases.filter(purchase => {
-        const purchaseDate = new Date(purchase.date);
-        purchaseDate.setHours(0, 0, 0, 0);
-        
-        if (fromDate && toDate) {
-            const from = new Date(fromDate);
-            from.setHours(0, 0, 0, 0);
-            const to = new Date(toDate);
-            to.setHours(23, 59, 59, 999);
-            return purchaseDate >= from && purchaseDate <= to;
-        } else if (fromDate) {
-            const from = new Date(fromDate);
-            from.setHours(0, 0, 0, 0);
-            return purchaseDate >= from;
-        } else if (toDate) {
-            const to = new Date(toDate);
-            to.setHours(23, 59, 59, 999);
-            return purchaseDate <= to;
-        }
-        return true;
-    });
+    // Filter by category
+    if (category && category.trim() !== '') {
+        filtered = filtered.filter(purchase => {
+            return purchase.category === category;
+        });
+    }
+    
+    return filtered;
 }
 
 // Run lottery
@@ -45,13 +55,14 @@ function runLottery() {
         request.onsuccess = () => {
             let purchases = request.result;
             
-            // Apply date range filter
+            // Apply date range and category filters
             const fromDate = document.getElementById('lotteryFromDate')?.value || '';
             const toDate = document.getElementById('lotteryToDate')?.value || '';
-            purchases = filterPurchasesByDateRange(purchases, fromDate, toDate);
+            const category = document.getElementById('lotteryCategory')?.value || '';
+            purchases = filterPurchasesByDateRange(purchases, fromDate, toDate, category);
             
             if (purchases.length === 0) {
-                showMessage('خریدی یافت نشد. ابتدا چند خرید اضافه کنید.', 'error');
+                showMessage('فروشی یافت نشد. ابتدا چند فروش اضافه کنید.', 'error');
                 return;
             }
 
@@ -119,7 +130,7 @@ function runLottery() {
                     });
 
                     if (lotteryParticipants.length === 0) {
-                        showMessage('هیچ مشتری واجد شرایط قرعه‌کشی نیست. مشتریان باید حداقل 50,000 خرید داشته باشند.', 'error');
+                        showMessage('هیچ مشتری واجد شرایط قرعه‌کشی نیست. مشتریان باید حداقل 50,000 فروش داشته باشند.', 'error');
                         return;
                     }
 
@@ -186,7 +197,7 @@ function calculateLotteryWithoutPhones(customerSummary) {
     });
 
     if (lotteryParticipants.length === 0) {
-        showMessage('هیچ مشتری واجد شرایط قرعه‌کشی نیست. مشتریان باید حداقل 50,000 خرید داشته باشند.', 'error');
+        showMessage('هیچ مشتری واجد شرایط قرعه‌کشی نیست. مشتریان باید حداقل 50,000 فروش داشته باشند.', 'error');
         return;
     }
 
@@ -216,7 +227,7 @@ function showLotteryResults(participants, winningCode, winner) {
     }
 
     // Generate HTML for lottery results
-    let resultsHTML = '<div class="lottery-results"><table class="lottery-table"><thead><tr><th>نام مشتری</th><th style="text-align: center;">مجموع خرید</th><th style="text-align: center;">شانس</th><th style="text-align: center;">کدهای شانس</th></tr></thead><tbody>';
+    let resultsHTML = '<div class="lottery-results"><table class="lottery-table"><thead><tr><th>نام مشتری</th><th style="text-align: center;">مجموع فروش</th><th style="text-align: center;">شانس</th><th style="text-align: center;">کدهای شانس</th></tr></thead><tbody>';
 
     participants.forEach(participant => {
         const isWinner = participant === winner;
@@ -238,7 +249,7 @@ function showLotteryResults(participants, winningCode, winner) {
             if (winner) {
                 const formattedWinnerTotal = winner.total.toLocaleString('en-US');
                 const phoneDisplay = winner.phoneNumber ? `<p>شماره تماس: <strong>${winner.phoneNumber}</strong></p>` : '';
-                resultsHTML += `<div class="lottery-winner-announcement"><h3>🎊 برنده: ${winner.name} 🎊</h3><p>کد برنده: <strong>${winningCode}</strong></p><p>مجموع خرید: <strong>$${formattedWinnerTotal}</strong></p>${phoneDisplay}</div>`;
+                resultsHTML += `<div class="lottery-winner-announcement"><h3>🎊 برنده: ${winner.name} 🎊</h3><p>کد برنده: <strong>${winningCode}</strong></p><p>مجموع فروش: <strong>$${formattedWinnerTotal}</strong></p>${phoneDisplay}</div>`;
             }
     
     resultsHTML += '</div>';
@@ -306,6 +317,7 @@ function initLottery() {
         clearFilterBtn.addEventListener('click', function() {
             document.getElementById('lotteryFromDate').value = '';
             document.getElementById('lotteryToDate').value = '';
+            document.getElementById('lotteryCategory').value = '';
             runLottery();
         });
     }
