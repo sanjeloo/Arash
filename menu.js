@@ -4,19 +4,16 @@
 function toggleMenu() {
     const menu = document.getElementById('hamburgerMenu');
     const backdrop = document.getElementById('menuBackdrop');
-    const hamburgerBtn = document.getElementById('hamburgerBtn');
     
     if (menu && backdrop) {
         if (menu.classList.contains('active')) {
             // Close menu
             menu.classList.remove('active');
             backdrop.style.display = 'none';
-            hamburgerBtn?.classList.remove('active');
         } else {
             // Open menu
             backdrop.style.display = 'block';
             menu.classList.add('active');
-            hamburgerBtn?.classList.add('active');
         }
     }
 }
@@ -25,12 +22,10 @@ function toggleMenu() {
 function closeMenu() {
     const menu = document.getElementById('hamburgerMenu');
     const backdrop = document.getElementById('menuBackdrop');
-    const hamburgerBtn = document.getElementById('hamburgerBtn');
     
     if (menu && backdrop) {
         menu.classList.remove('active');
         backdrop.style.display = 'none';
-        hamburgerBtn?.classList.remove('active');
     }
 }
 
@@ -52,9 +47,9 @@ function initMenu() {
         backdrop.addEventListener('click', closeMenu);
     }
     
-    // Close menu when clicking on menu buttons (optional - you can remove this if you want menu to stay open)
-    const menuButtons = document.querySelectorAll('.menu-btn');
-    menuButtons.forEach(btn => {
+    // Close menu when clicking on menu items (optional - you can remove this if you want menu to stay open)
+    const menuItems = document.querySelectorAll('.menu-item, .menu-btn');
+    menuItems.forEach(btn => {
         btn.addEventListener('click', function() {
             // Close menu after a short delay to allow button action to complete
             setTimeout(closeMenu, 300);

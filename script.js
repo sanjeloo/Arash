@@ -248,7 +248,7 @@ document.getElementById('purchaseForm').addEventListener('submit', function(e) {
             customerRequest.onsuccess = () => {
                 showMessage('فروش با موفقیت افزوده شد!', 'success');
                 document.getElementById('purchaseForm').reset();
-                loadPurchases();
+                loadPurchases(true);
                 // Focus back on customer name input
                 setTimeout(() => {
                     customerNameInput.focus();
@@ -259,7 +259,7 @@ document.getElementById('purchaseForm').addEventListener('submit', function(e) {
                 // Still show success for purchase even if customer save fails
                 showMessage('فروش با موفقیت افزوده شد!', 'success');
                 document.getElementById('purchaseForm').reset();
-                loadPurchases();
+                loadPurchases(true);
                 // Focus back on customer name input
                 setTimeout(() => {
                     customerNameInput.focus();
@@ -468,7 +468,7 @@ function updatePurchasePrice(purchaseId, newPrice) {
     
     updateRequest.onsuccess = () => {
         showMessage('مبلغ با موفقیت به‌روزرسانی شد!', 'success');
-        loadPurchases(); // Reload to show updated price
+        loadPurchases(true); // Reload to show updated price
     };
     
     updateRequest.onerror = () => {
@@ -507,7 +507,7 @@ function updatePurchaseCategory(purchaseId, newCategory) {
         
         updateRequest.onsuccess = () => {
             showMessage('دسته‌بندی با موفقیت به‌روزرسانی شد!', 'success');
-            loadPurchases(); // Reload to show updated category
+            loadPurchases(true); // Reload to show updated category
         };
         
         updateRequest.onerror = () => {
@@ -550,7 +550,7 @@ function deletePurchase(purchaseId) {
     
     deleteRequest.onsuccess = () => {
         showMessage('فروش با موفقیت حذف شد!', 'success');
-        loadPurchases(); // Reload to show updated list
+        loadPurchases(true); // Reload to show updated list
     };
     
     deleteRequest.onerror = () => {
@@ -558,77 +558,182 @@ function deletePurchase(purchaseId) {
     };
 }
 
-// Load and display purchases
-function loadPurchases() {
-    if (!db) return;
+// Variables for lazy loading with cursor-based fetching
+let displayedCount = 0;
+const RECORDS_PER_PAGE = 5;
+let isLoading = false;
+let hasMoreRecords = true;
+let cursorPosition = null; // Store cursor position for next batch
+let totalRecords = 0;
 
+// Get total count of records (for performance monitoring)
+function getTotalRecordCount(callback) {
+    if (!db) {
+        callback(0);
+        return;
+    }
+    
     const transaction = db.transaction([STORE_NAME], 'readonly');
     const objectStore = transaction.objectStore(STORE_NAME);
-    const request = objectStore.getAll();
+    const countRequest = objectStore.count();
+    
+    countRequest.onsuccess = () => {
+        totalRecords = countRequest.result;
+        callback(totalRecords);
+    };
+    
+    countRequest.onerror = () => {
+        callback(0);
+    };
+}
 
-    request.onsuccess = () => {
-        const purchases = request.result;
-        const container = document.getElementById('purchasesContainer');
-        
-        if (purchases.length === 0) {
+// Load and display purchases with cursor-based lazy loading
+function loadPurchases(reset = false) {
+    if (!db) return;
+
+    const container = document.getElementById('purchasesContainer');
+    
+    if (reset) {
+        displayedCount = 0;
+        cursorPosition = null;
+        hasMoreRecords = true;
+        container.innerHTML = '';
+    }
+    
+    // Check if we have records first
+    getTotalRecordCount((count) => {
+        if (count === 0) {
             container.innerHTML = '<div style="text-align: center; padding: 60px 20px;"><div style="font-size: 64px; margin-bottom: 20px; opacity: 0.3;">📋</div><p style="color: #a0aec0; font-size: 16px; font-weight: 500;">هنوز فروشی ثبت نشده است</p><p style="color: #cbd5e0; font-size: 14px; margin-top: 8px;">برای شروع، اولین فروش را اضافه کنید</p></div>';
             return;
         }
-
-        // Sort by date (newest first)
-        purchases.sort((a, b) => new Date(b.date) - new Date(a.date));
         
-        // Category emoji mapping
-        const categoryEmojis = {
-            'فیلم و اهنگ': '🎬',
-            'فیلتر شکن': '🔒',
-            'اپل ایدی': '🍎',
-            'لوازم جانبی': '📱',
-            'خدمات اینستاگرام': '📸',
-            'قفل گوشی': '🔓',
-            'سایر': '📦'
-        };
+        // Load first batch
+        loadNextBatchFromDB();
+    });
+}
 
-        // Category color mapping
-        const categoryColors = {
-            'فیلم و اهنگ': {
-                gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                color: '#4c51bf',
-                shadow: 'rgba(102, 126, 234, 0.3)'
-            },
-            'فیلتر شکن': {
-                gradient: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)',
-                color: '#0e7490',
-                shadow: 'rgba(6, 182, 212, 0.3)'
-            },
-            'اپل ایدی': {
-                gradient: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-                color: '#991b1b',
-                shadow: 'rgba(239, 68, 68, 0.3)'
-            },
-            'لوازم جانبی': {
-                gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                color: '#047857',
-                shadow: 'rgba(16, 185, 129, 0.3)'
-            },
-            'خدمات اینستاگرام': {
-                gradient: 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)',
-                color: '#9f1239',
-                shadow: 'rgba(236, 72, 153, 0.3)'
-            },
-            'قفل گوشی': {
-                gradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-                color: '#92400e',
-                shadow: 'rgba(245, 158, 11, 0.3)'
-            },
-            'سایر': {
-                gradient: 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)',
-                color: '#374151',
-                shadow: 'rgba(107, 114, 128, 0.3)'
+// Load next batch of records from database using cursor (sorted by date descending)
+function loadNextBatchFromDB() {
+    if (isLoading || !hasMoreRecords) {
+        return;
+    }
+    
+    isLoading = true;
+    
+    const transaction = db.transaction([STORE_NAME], 'readonly');
+    const objectStore = transaction.objectStore(STORE_NAME);
+    const index = objectStore.index('date');
+    
+    // Use cursor to fetch records sorted by date (descending - newest first)
+    // If we have a cursor position, continue from there, otherwise start from beginning
+    const keyRange = cursorPosition ? IDBKeyRange.upperBound(cursorPosition, true) : null;
+    const request = index.openCursor(keyRange, 'prev'); // 'prev' for descending order
+    
+    const batch = [];
+    
+    request.onsuccess = (event) => {
+        const cursor = event.target.result;
+        
+        if (!cursor) {
+            // No more records
+            hasMoreRecords = false;
+            isLoading = false;
+            
+            // If we haven't displayed anything, show empty message
+            if (displayedCount === 0) {
+                const container = document.getElementById('purchasesContainer');
+                if (container) {
+                    container.innerHTML = '<div style="text-align: center; padding: 60px 20px;"><div style="font-size: 64px; margin-bottom: 20px; opacity: 0.3;">📋</div><p style="color: #a0aec0; font-size: 16px; font-weight: 500;">هنوز فروشی ثبت نشده است</p><p style="color: #cbd5e0; font-size: 14px; margin-top: 8px;">برای شروع، اولین فروش را اضافه کنید</p></div>';
+                }
             }
-        };
+            return;
+        }
+        
+        // Add record to batch
+        batch.push(cursor.value);
+        
+        // If we have enough records, stop and render
+        if (batch.length >= RECORDS_PER_PAGE) {
+            cursorPosition = cursor.key; // Store position for next batch
+            renderBatch(batch);
+            isLoading = false;
+            
+            // Setup scroll listener if there might be more records
+            setTimeout(() => {
+                setupScrollListener();
+            }, 100);
+            return;
+        }
+        
+        // Continue to next record
+        cursor.continue();
+    };
+    
+    request.onerror = () => {
+        isLoading = false;
+        hasMoreRecords = false;
+    };
+}
 
-        container.innerHTML = purchases.map(purchase => {
+// Render a batch of purchases
+function renderBatch(batch) {
+    if (batch.length === 0) return;
+    
+    const container = document.getElementById('purchasesContainer');
+    displayedCount += batch.length;
+    
+    // Category emoji mapping
+    const categoryEmojis = {
+        'فیلم و اهنگ': '🎬',
+        'فیلتر شکن': '🔒',
+        'اپل ایدی': '🍎',
+        'لوازم جانبی': '📱',
+        'خدمات اینستاگرام': '📸',
+        'قفل گوشی': '🔓',
+        'سایر': '📦'
+    };
+
+    // Category color mapping
+    const categoryColors = {
+        'فیلم و اهنگ': {
+            gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: '#4c51bf',
+            shadow: 'rgba(102, 126, 234, 0.3)'
+        },
+        'فیلتر شکن': {
+            gradient: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)',
+            color: '#0e7490',
+            shadow: 'rgba(6, 182, 212, 0.3)'
+        },
+        'اپل ایدی': {
+            gradient: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+            color: '#991b1b',
+            shadow: 'rgba(239, 68, 68, 0.3)'
+        },
+        'لوازم جانبی': {
+            gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+            color: '#047857',
+            shadow: 'rgba(16, 185, 129, 0.3)'
+        },
+        'خدمات اینستاگرام': {
+            gradient: 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)',
+            color: '#9f1239',
+            shadow: 'rgba(236, 72, 153, 0.3)'
+        },
+        'قفل گوشی': {
+            gradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+            color: '#92400e',
+            shadow: 'rgba(245, 158, 11, 0.3)'
+        },
+        'سایر': {
+            gradient: 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)',
+            color: '#374151',
+            shadow: 'rgba(107, 114, 128, 0.3)'
+        }
+    };
+
+    // Generate HTML for the batch
+    const batchHTML = batch.map(purchase => {
             // Format date for display in Persian
             const purchaseDate = new Date(purchase.date);
             const formattedDate = typeof gregorianDateToPersian === 'function' 
@@ -694,15 +799,90 @@ function loadPurchases() {
             `;
         }).join('');
         
-        // Add click event listeners for price editing
-        attachPriceEditListeners();
+    // Use DocumentFragment for better performance
+    const fragment = document.createDocumentFragment();
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = batchHTML;
+    
+    while (tempDiv.firstChild) {
+        fragment.appendChild(tempDiv.firstChild);
+    }
+    
+    // Append fragment to container (single DOM operation)
+    container.appendChild(fragment);
+    
+    // Add event listeners using event delegation (more efficient)
+    attachEventListenersToNewElements(batch);
+    
+    // Setup scroll listener if there might be more records
+    if (hasMoreRecords) {
+        setTimeout(() => {
+            setupScrollListener();
+        }, 100);
+    }
+}
+
+// Attach event listeners to newly added elements (optimized)
+function attachEventListenersToNewElements(batch) {
+    // Price editing listeners
+    attachPriceEditListeners();
+    
+    // Category editing listeners
+    attachCategoryEditListeners();
+    
+    // Delete button listeners
+    attachDeleteListeners();
+}
+
+// Setup scroll listener for lazy loading
+function setupScrollListener() {
+    const container = document.getElementById('purchasesContainer');
+    if (!container) return;
+    
+    // Remove existing listener to avoid duplicates
+    const boundHandleScroll = handleScroll;
+    container.removeEventListener('scroll', boundHandleScroll);
+    
+    // Add scroll listener
+    container.addEventListener('scroll', boundHandleScroll, { passive: true });
+    
+    // Also check immediately if container is already at bottom (no scroll needed)
+    setTimeout(() => {
+        const scrollTop = container.scrollTop;
+        const scrollHeight = container.scrollHeight;
+        const clientHeight = container.clientHeight;
         
-        // Add click event listeners for category editing
-        attachCategoryEditListeners();
+        // If content fits in container (no scrollbar), load more
+        if (scrollHeight <= clientHeight && hasMoreRecords) {
+            loadNextBatchFromDB();
+        }
+    }, 100);
+}
+
+// Debounce scroll handler for better performance
+let scrollTimeout = null;
+function handleScroll() {
+    // Debounce scroll events (only process every 100ms)
+    if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+    }
+    
+    scrollTimeout = setTimeout(() => {
+        const container = document.getElementById('purchasesContainer');
+        if (!container || isLoading) return;
         
-        // Add click event listeners for delete buttons
-        attachDeleteListeners();
-    };
+        // Check if user scrolled near the bottom (within 50px)
+        const scrollTop = container.scrollTop;
+        const scrollHeight = container.scrollHeight;
+        const clientHeight = container.clientHeight;
+        
+        // Check if we're near the bottom
+        const isNearBottom = scrollTop + clientHeight >= scrollHeight - 50;
+        
+        if (isNearBottom && hasMoreRecords) {
+            loadNextBatchFromDB();
+        }
+    }, 100);
 }
 
 

@@ -29,23 +29,47 @@
             </div>
             <div class="menu-content">
                 <div class="menu-section">
-                    <h3>عملیات</h3>
-                    <button type="button" id="summaryBtn" class="menu-btn summary-btn">نمایش خلاصه</button>
-                    <button type="button" id="lotteryBtn" class="menu-btn lottery-btn">قرعه‌کشی</button>
+                    <button type="button" id="summaryBtn" class="menu-item">
+                        <span class="menu-icon">📊</span>
+                        <span class="menu-text">نمایش خلاصه</span>
+                    </button>
+                    <button type="button" id="lotteryBtn" class="menu-item">
+                        <span class="menu-icon">🎲</span>
+                        <span class="menu-text">قرعه‌کشی</span>
+                    </button>
                 </div>
+                
+                <div class="menu-divider"></div>
+                
                 <div class="menu-section">
-                    <h3>پشتیبان‌گیری</h3>
-                    <button type="button" id="backupPurchasesBtn" class="menu-btn backup-btn">پشتیبان فروش‌ها</button>
-                    <button type="button" id="backupCustomersBtn" class="menu-btn backup-btn">پشتیبان مشتریان</button>
+                    <div class="menu-group-title">پشتیبان‌گیری و بازیابی</div>
+                    <div class="menu-group">
+                        <button type="button" id="backupPurchasesBtn" class="menu-item menu-item-small">
+                            <span class="menu-icon">💾</span>
+                            <span class="menu-text">پشتیبان فروش‌ها</span>
+                        </button>
+                        <button type="button" id="backupCustomersBtn" class="menu-item menu-item-small">
+                            <span class="menu-icon">👥</span>
+                            <span class="menu-text">پشتیبان مشتریان</span>
+                        </button>
+                        <button type="button" id="restorePurchasesBtn" class="menu-item menu-item-small">
+                            <span class="menu-icon">📥</span>
+                            <span class="menu-text">بازیابی فروش‌ها</span>
+                        </button>
+                        <button type="button" id="restoreCustomersBtn" class="menu-item menu-item-small">
+                            <span class="menu-icon">📥</span>
+                            <span class="menu-text">بازیابی مشتریان</span>
+                        </button>
+                    </div>
                 </div>
+                
+                <div class="menu-divider"></div>
+                
                 <div class="menu-section">
-                    <h3>بازیابی</h3>
-                    <button type="button" id="restorePurchasesBtn" class="menu-btn restore-btn">بازیابی فروش‌ها</button>
-                    <button type="button" id="restoreCustomersBtn" class="menu-btn restore-btn">بازیابی مشتریان</button>
-                </div>
-                <div class="menu-section">
-                    <h3>پایگاه داده</h3>
-                    <button type="button" id="resetBtn" class="menu-btn reset-btn">بازنشانی پایگاه داده</button>
+                    <button type="button" id="resetBtn" class="menu-item menu-item-danger">
+                        <span class="menu-icon">🔄</span>
+                        <span class="menu-text">بازنشانی پایگاه داده</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -132,12 +156,12 @@
             </div>
             <div class="date-range-filter">
                 <div class="date-range-item">
-                    <label for="summaryFromDate">از تاریخ:</label>
-                    <input type="text" id="summaryFromDate" class="date-input">
+                    <label for="summaryFromDate">از تاریخ: <span style="color: red;">*</span></label>
+                    <input type="text" id="summaryFromDate" class="date-input" required>
                 </div>
                 <div class="date-range-item">
-                    <label for="summaryToDate">تا تاریخ:</label>
-                    <input type="text" id="summaryToDate" class="date-input">
+                    <label for="summaryToDate">تا تاریخ: <span style="color: red;">*</span></label>
+                    <input type="text" id="summaryToDate" class="date-input" required>
                 </div>
                 <div class="date-range-item">
                     <label for="summaryCategory">دسته‌بندی:</label>
@@ -166,12 +190,12 @@
             </div>
             <div class="date-range-filter">
                 <div class="date-range-item">
-                    <label for="lotteryFromDate">از تاریخ:</label>
-                    <input type="text" id="lotteryFromDate" class="date-input">
+                    <label for="lotteryFromDate">از تاریخ: <span style="color: red;">*</span></label>
+                    <input type="text" id="lotteryFromDate" class="date-input" required>
                 </div>
                 <div class="date-range-item">
-                    <label for="lotteryToDate">تا تاریخ:</label>
-                    <input type="text" id="lotteryToDate" class="date-input">
+                    <label for="lotteryToDate">تا تاریخ: <span style="color: red;">*</span></label>
+                    <input type="text" id="lotteryToDate" class="date-input" required>
                 </div>
                 <div class="date-range-item">
                     <label for="lotteryCategory">دسته‌بندی:</label>

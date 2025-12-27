@@ -41,6 +41,61 @@ function filterPurchasesByDateRange(purchases, fromDate, toDate, category) {
     return filtered;
 }
 
+// Fetch purchases using cursor with date and category filters
+function fetchPurchasesWithFilters(fromDate, toDate, category, callback) {
+    if (!db) {
+        callback([]);
+        return;
+    }
+    
+    const purchases = [];
+    const transaction = db.transaction([STORE_NAME], 'readonly');
+    const objectStore = transaction.objectStore(STORE_NAME);
+    const index = objectStore.index('date');
+    
+    // Create date range for cursor
+    let keyRange = null;
+    if (fromDate && toDate) {
+        const from = new Date(fromDate);
+        from.setHours(0, 0, 0, 0);
+        const to = new Date(toDate);
+        to.setHours(23, 59, 59, 999);
+        keyRange = IDBKeyRange.bound(from.toISOString(), to.toISOString(), false, false);
+    } else if (fromDate) {
+        const from = new Date(fromDate);
+        from.setHours(0, 0, 0, 0);
+        keyRange = IDBKeyRange.lowerBound(from.toISOString(), false);
+    } else if (toDate) {
+        const to = new Date(toDate);
+        to.setHours(23, 59, 59, 999);
+        keyRange = IDBKeyRange.upperBound(to.toISOString(), false);
+    }
+    
+    const request = keyRange ? index.openCursor(keyRange) : index.openCursor();
+    
+    request.onsuccess = (event) => {
+        const cursor = event.target.result;
+        
+        if (!cursor) {
+            // All records processed, apply category filter and return
+            let filtered = purchases;
+            if (category && category.trim() !== '') {
+                filtered = purchases.filter(purchase => purchase.category === category);
+            }
+            callback(filtered);
+            return;
+        }
+        
+        const purchase = cursor.value;
+        purchases.push(purchase);
+        cursor.continue();
+    };
+    
+    request.onerror = () => {
+        callback([]);
+    };
+}
+
 // Show customer purchase summary
 function showSummary() {
     if (!db) {
@@ -48,29 +103,45 @@ function showSummary() {
         return;
     }
 
-    try {
-        const transaction = db.transaction([STORE_NAME], 'readonly');
-        const objectStore = transaction.objectStore(STORE_NAME);
-        const request = objectStore.getAll();
-
-        request.onsuccess = () => {
-            let purchases = request.result;
-            
-            // Apply date range and category filters
-            const persianFromDate = document.getElementById('summaryFromDate')?.value || '';
-            const persianToDate = document.getElementById('summaryToDate')?.value || '';
-            
-            // Convert Persian dates to Gregorian for filtering
-            const fromDate = persianFromDate && typeof getGregorianDateFromPersian === 'function' 
-                ? getGregorianDateFromPersian(persianFromDate) 
-                : '';
-            const toDate = persianToDate && typeof getGregorianDateFromPersian === 'function' 
-                ? getGregorianDateFromPersian(persianToDate) 
-                : '';
-            
-            const category = document.getElementById('summaryCategory')?.value || '';
-            
-            purchases = filterPurchasesByDateRange(purchases, fromDate, toDate, category);
+    // Validate required dates
+    const persianFromDate = document.getElementById('summaryFromDate')?.value || '';
+    const persianToDate = document.getElementById('summaryToDate')?.value || '';
+    
+    if (!persianFromDate || !persianToDate) {
+        const summaryContainer = document.getElementById('summaryContainer');
+        if (summaryContainer) {
+            summaryContainer.innerHTML = '<p style="color: #ef4444; text-align: center; padding: 20px; font-weight: 600;">⚠️ لطفاً تاریخ شروع و پایان را انتخاب کنید</p>';
+        }
+        return;
+    }
+    
+    // Convert Persian dates to Gregorian for filtering
+    const fromDate = persianFromDate && typeof getGregorianDateFromPersian === 'function' 
+        ? getGregorianDateFromPersian(persianFromDate) 
+        : '';
+    const toDate = persianToDate && typeof getGregorianDateFromPersian === 'function' 
+        ? getGregorianDateFromPersian(persianToDate) 
+        : '';
+    
+    if (!fromDate || !toDate) {
+        const summaryContainer = document.getElementById('summaryContainer');
+        if (summaryContainer) {
+            summaryContainer.innerHTML = '<p style="color: #ef4444; text-align: center; padding: 20px; font-weight: 600;">⚠️ لطفاً تاریخ‌های معتبری انتخاب کنید</p>';
+        }
+        return;
+    }
+    
+    const category = document.getElementById('summaryCategory')?.value || '';
+    
+    // Show loading message
+    const summaryContainer = document.getElementById('summaryContainer');
+    if (summaryContainer) {
+        summaryContainer.innerHTML = '<p style="color: #667eea; text-align: center; padding: 20px;">در حال بارگذاری...</p>';
+    }
+    
+    // Fetch purchases using cursor
+    fetchPurchasesWithFilters(fromDate, toDate, category, (purchases) => {
+        try {
             
             const summaryContainer = document.getElementById('summaryContainer');
             const summarySection = document.getElementById('summarySection');
@@ -147,14 +218,10 @@ function showSummary() {
             setTimeout(() => {
                 summarySection.classList.add('show');
             }, 10);
-        };
-
-        request.onerror = (event) => {
-            showMessage('خطا در بارگذاری فروش‌ها برای خلاصه', 'error');
-        };
-    } catch (error) {
-        showMessage('Error generating summary. Please try again.', 'error');
-    }
+        } catch (error) {
+            showMessage('خطا در تولید خلاصه. لطفاً دوباره تلاش کنید.', 'error');
+        }
+    });
 }
 
 // Initialize summary functionality
@@ -177,7 +244,11 @@ function initSummary() {
                     }, 100);
                 }, 10);
             }
-            showSummary();
+            // Clear container - user must click "Apply Filter" to see results
+            const summaryContainer = document.getElementById('summaryContainer');
+            if (summaryContainer) {
+                summaryContainer.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">لطفاً تاریخ شروع و پایان را انتخاب کرده و روی "اعمال فیلتر" کلیک کنید</p>';
+            }
         });
     }
 
