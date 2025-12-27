@@ -249,6 +249,10 @@ document.getElementById('purchaseForm').addEventListener('submit', function(e) {
                 showMessage('فروش با موفقیت افزوده شد!', 'success');
                 document.getElementById('purchaseForm').reset();
                 loadPurchases(true);
+                
+                // Check if backup reminder should be shown
+                checkBackupReminder();
+                
                 // Focus back on customer name input
                 setTimeout(() => {
                     customerNameInput.focus();
@@ -260,6 +264,10 @@ document.getElementById('purchaseForm').addEventListener('submit', function(e) {
                 showMessage('فروش با موفقیت افزوده شد!', 'success');
                 document.getElementById('purchaseForm').reset();
                 loadPurchases(true);
+                
+                // Check if backup reminder should be shown
+                checkBackupReminder();
+                
                 // Focus back on customer name input
                 setTimeout(() => {
                     customerNameInput.focus();
@@ -285,6 +293,79 @@ function showMessage(text, type) {
         messageDiv.className = 'message';
     }, 3000);
 }
+
+// Backup reminder thresholds
+const BACKUP_THRESHOLDS = [100, 500, 1000, 5000, 10000, 50000, 100000];
+
+// Check if backup reminder should be shown
+function checkBackupReminder() {
+    if (!db) return;
+    
+    getTotalRecordCount((count) => {
+        // Check if we've hit a milestone
+        const milestone = BACKUP_THRESHOLDS.find(threshold => count === threshold);
+        
+        if (milestone) {
+            // Check if user has dismissed this milestone
+            const dismissedKey = `backupReminderDismissed_${milestone}`;
+            const dismissed = localStorage.getItem(dismissedKey);
+            
+            if (!dismissed) {
+                showBackupReminder(milestone, count);
+            }
+        }
+    });
+}
+
+// Show backup reminder notification
+function showBackupReminder(milestone, totalRecords) {
+    // Create reminder element
+    const reminder = document.createElement('div');
+    reminder.id = 'backupReminder';
+    reminder.className = 'backup-reminder';
+    reminder.innerHTML = `
+        <div class="backup-reminder-content">
+            <div class="backup-reminder-icon">💾</div>
+            <div class="backup-reminder-text">
+                <strong>توصیه می‌شود از داده‌های خود پشتیبان بگیرید</strong>
+                <p>شما ${totalRecords.toLocaleString('fa-IR')} رکورد فروش دارید. برای محافظت از داده‌هایتان، لطفاً از منو پشتیبان‌گیری کنید.</p>
+            </div>
+            <button class="backup-reminder-close" onclick="dismissBackupReminder(${milestone})">×</button>
+        </div>
+    `;
+    
+    // Insert at the top of container
+    const container = document.querySelector('.container');
+    if (container) {
+        container.insertBefore(reminder, container.firstChild);
+        
+        // Auto-hide after 10 seconds
+        setTimeout(() => {
+            if (reminder.parentNode) {
+                reminder.style.opacity = '0';
+                setTimeout(() => {
+                    if (reminder.parentNode) {
+                        reminder.remove();
+                    }
+                }, 300);
+            }
+        }, 10000);
+    }
+}
+
+// Dismiss backup reminder (global function for onclick)
+window.dismissBackupReminder = function(milestone) {
+    const dismissedKey = `backupReminderDismissed_${milestone}`;
+    localStorage.setItem(dismissedKey, 'true');
+    
+    const reminder = document.getElementById('backupReminder');
+    if (reminder) {
+        reminder.style.opacity = '0';
+        setTimeout(() => {
+            reminder.remove();
+        }, 300);
+    }
+};
 
 // Attach price edit event listeners
 function attachPriceEditListeners() {
