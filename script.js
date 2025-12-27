@@ -1,12 +1,16 @@
 // Initialize IndexedDB
 let db;
 let customerDb;
+let reminderDb;
 const DB_NAME = 'PurchaseDB';
 const CUSTOMER_DB_NAME = 'CustomerDB';
+const REMINDER_DB_NAME = 'ReminderDB';
 const DB_VERSION = 1;
 const CUSTOMER_DB_VERSION = 1;
+const REMINDER_DB_VERSION = 1;
 const STORE_NAME = 'purchases';
 const CUSTOMER_STORE_NAME = 'customers';
+const REMINDER_STORE_NAME = 'reminders';
 
 // Open purchases database
 const request = indexedDB.open(DB_NAME, DB_VERSION);
@@ -45,6 +49,31 @@ customerRequest.onupgradeneeded = (event) => {
     if (!customerDb.objectStoreNames.contains(CUSTOMER_STORE_NAME)) {
         const objectStore = customerDb.createObjectStore(CUSTOMER_STORE_NAME, { keyPath: 'customerName' });
         objectStore.createIndex('phoneNumber', 'phoneNumber', { unique: false });
+    }
+};
+
+// Open reminders database
+const reminderRequest = indexedDB.open(REMINDER_DB_NAME, REMINDER_DB_VERSION);
+
+reminderRequest.onerror = (event) => {
+    // Reminder database error handled silently
+};
+
+reminderRequest.onsuccess = (event) => {
+    reminderDb = event.target.result;
+    // Check reminders after database is ready (with delay to ensure reminders.js is loaded)
+    setTimeout(() => {
+        if (typeof checkExpenseReminders === 'function') {
+            checkExpenseReminders();
+        }
+    }, 1000);
+};
+
+reminderRequest.onupgradeneeded = (event) => {
+    reminderDb = event.target.result;
+    if (!reminderDb.objectStoreNames.contains(REMINDER_STORE_NAME)) {
+        const objectStore = reminderDb.createObjectStore(REMINDER_STORE_NAME, { keyPath: 'id', autoIncrement: true });
+        objectStore.createIndex('dueDate', 'dueDate', { unique: false });
     }
 };
 

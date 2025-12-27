@@ -116,6 +116,238 @@ body {
     background: rgba(255, 255, 255, 0.3);
 }
 
+/* Reminders Dialog Styles */
+.reminders-content {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    padding: 20px;
+    flex: 1;
+    min-height: 0;
+    overflow: visible;
+}
+
+.reminder-form-section,
+.reminders-list-section {
+    background: #f7fafc;
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+}
+
+.reminder-form-section {
+    flex-shrink: 0;
+}
+
+.reminders-list-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 200px;
+    overflow: visible;
+}
+
+.reminder-form-section h3,
+.reminders-list-section h3 {
+    margin: 0 0 20px 0;
+    color: #2d3748;
+    font-size: 1.2em;
+    font-family: 'Vazirmatn', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    flex-shrink: 0;
+}
+
+.reminders-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+    overflow: visible;
+    min-height: 200px;
+    padding-right: 5px;
+}
+
+.reminder-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    border-radius: 10px;
+    background: white;
+    border: 2px solid #e2e8f0;
+    transition: all 0.2s ease;
+}
+
+.reminder-item:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.reminder-item.reminder-overdue {
+    background: linear-gradient(135deg, #fee 0%, #fdd 100%);
+    border-color: #ef4444;
+}
+
+.reminder-item.reminder-due-soon {
+    background: linear-gradient(135deg, #fff8e1 0%, #fff3cd 100%);
+    border-color: #f59e0b;
+}
+
+.reminder-item.reminder-upcoming {
+    background: linear-gradient(135deg, #e6f3ff 0%, #d0e7ff 100%);
+    border-color: #3b82f6;
+}
+
+.reminder-info {
+    flex: 1;
+}
+
+.reminder-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.reminder-header strong {
+    color: #2d3748;
+    font-size: 16px;
+    font-family: 'Vazirmatn', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.reminder-status {
+    font-size: 13px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.7);
+    font-family: 'Vazirmatn', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.reminder-details {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    margin-top: 8px;
+}
+
+.reminder-amount {
+    color: #667eea;
+    font-weight: 700;
+    font-size: 16px;
+    font-family: 'Vazirmatn', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.reminder-date {
+    color: #718096;
+    font-size: 14px;
+    font-family: 'Vazirmatn', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.reminder-description {
+    margin-top: 8px;
+    color: #718096;
+    font-size: 13px;
+    font-style: italic;
+    font-family: 'Vazirmatn', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.delete-reminder-btn {
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    opacity: 0.6;
+}
+
+.delete-reminder-btn:hover {
+    opacity: 1;
+    background: rgba(239, 68, 68, 0.1);
+    transform: scale(1.1);
+}
+
+/* Expense Reminders Notification */
+.expense-reminders-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    left: 20px;
+    max-width: 600px;
+    margin: 0 auto;
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(245, 158, 11, 0.4);
+    z-index: 10004;
+    animation: slideDown 0.3s ease;
+    transition: opacity 0.3s ease;
+}
+
+.reminder-notification-content {
+    padding: 18px 20px;
+}
+
+.reminder-notification-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    font-family: 'Vazirmatn', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.reminder-notification-icon {
+    font-size: 24px;
+}
+
+.reminder-notification-header strong {
+    flex: 1;
+    font-size: 17px;
+    font-family: 'Vazirmatn', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.reminder-notification-close {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 20px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease;
+    font-family: 'Vazirmatn', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.reminder-notification-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.reminder-notification-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.reminder-notification-item {
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 1.6;
+    font-family: 'Vazirmatn', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.reminder-notification-item.overdue {
+    background: rgba(239, 68, 68, 0.3);
+    border-right: 3px solid #ef4444;
+}
+
 .form-section {
     flex-shrink: 0;
     max-width: 600px;
@@ -933,8 +1165,8 @@ select {
     margin: 0;
     max-width: 90vw;
     max-height: 90vh;
-    width: 100%;
-    min-width: 600px;
+    width: auto;
+    min-width: 450px;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -949,6 +1181,13 @@ select {
     opacity: 1;
     transform: translate(-50%, -50%) scale(1);
     pointer-events: auto;
+}
+
+#remindersDialog {
+    max-width: 1200px;
+    width: 90vw;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .summary-header {

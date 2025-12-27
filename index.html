@@ -37,6 +37,10 @@
                         <span class="menu-icon">🎲</span>
                         <span class="menu-text">قرعه‌کشی</span>
                     </button>
+                    <button type="button" id="remindersBtn" class="menu-item">
+                        <span class="menu-icon">⏰</span>
+                        <span class="menu-text">یادآوری هزینه‌ها</span>
+                    </button>
                 </div>
                 
                 <div class="menu-divider"></div>
@@ -216,6 +220,43 @@
             <div id="lotteryContainer" class="summary-scrollable"></div>
         </div>
 
+        <!-- Reminders Dialog -->
+        <div id="remindersBackdrop" class="summary-backdrop" style="display: none;"></div>
+        <div id="remindersDialog" class="summary-section" style="display: none;">
+            <div class="summary-header">
+                <h2>یادآوری هزینه‌ها</h2>
+                <button type="button" id="closeRemindersBtn" class="close-btn">×</button>
+            </div>
+            <div class="reminders-content">
+                <div class="reminder-form-section">
+                    <h3>افزودن یادآوری جدید</h3>
+                    <form id="reminderForm">
+                        <div class="form-group">
+                            <label for="reminderTitle">عنوان:</label>
+                            <input type="text" id="reminderTitle" placeholder="مثال: چک بانک ملت" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="reminderAmount">مبلغ:</label>
+                            <input type="text" id="reminderAmount" placeholder="مثال: 1,000,000" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="reminderDueDate">تاریخ سررسید:</label>
+                            <input type="text" id="reminderDueDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="reminderDescription">توضیحات (اختیاری):</label>
+                            <input type="text" id="reminderDescription" placeholder="توضیحات اضافی">
+                        </div>
+                        <button type="submit" class="submit-btn">افزودن یادآوری</button>
+                    </form>
+                </div>
+                <div class="reminders-list-section">
+                    <h3>یادآوری‌های فعال</h3>
+                    <div id="remindersList" class="reminders-list"></div>
+                </div>
+            </div>
+        </div>
+
         <div id="resetBackdrop" class="summary-backdrop" style="display: none;"></div>
         <div id="resetDialog" class="reset-confirmation-dialog" style="display: none;">
             <div class="reset-dialog-content">
@@ -257,5 +298,6 @@
     <script src="reset.js"></script>
     <script src="backup.js"></script>
     <script src="menu.js"></script>
+    <script src="reminders.js"></script>
 </body>
 </html>
