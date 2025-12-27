@@ -34,7 +34,6 @@ function backupPurchases() {
             showMessage('خطا در پشتیبان‌گیری داده‌های فروش', 'error');
         };
     } catch (error) {
-        console.error('Error in backupPurchases:', error);
         showMessage('خطا در ایجاد پشتیبان فروش‌ها. لطفاً دوباره تلاش کنید.', 'error');
     }
 }
@@ -73,7 +72,6 @@ function backupCustomers() {
             showMessage('خطا در پشتیبان‌گیری داده‌های مشتریان', 'error');
         };
     } catch (error) {
-        console.error('Error in backupCustomers:', error);
         showMessage('خطا در ایجاد پشتیبان مشتریان. لطفاً دوباره تلاش کنید.', 'error');
     }
 }
@@ -163,7 +161,6 @@ function restorePurchases() {
                     showMessage('پایگاه داده آماده نیست', 'error');
                 }
             } catch (error) {
-                console.error('Error parsing purchases file:', error);
                 showMessage('خطا در خواندن فایل پشتیبان فروش‌ها. فرمت JSON نامعتبر است.', 'error');
             }
         };
@@ -260,7 +257,6 @@ function restoreCustomers() {
                     showMessage('پایگاه داده مشتریان آماده نیست', 'error');
                 }
             } catch (error) {
-                console.error('Error parsing customers file:', error);
                 showMessage('خطا در خواندن فایل پشتیبان مشتریان. فرمت JSON نامعتبر است.', 'error');
             }
         };
@@ -277,29 +273,21 @@ function initBackup() {
     const backupPurchasesBtn = document.getElementById('backupPurchasesBtn');
     if (backupPurchasesBtn) {
         backupPurchasesBtn.addEventListener('click', backupPurchases);
-    } else {
-        console.error('Backup purchases button not found');
     }
 
     const backupCustomersBtn = document.getElementById('backupCustomersBtn');
     if (backupCustomersBtn) {
         backupCustomersBtn.addEventListener('click', backupCustomers);
-    } else {
-        console.error('Backup customers button not found');
     }
 
     const restorePurchasesBtn = document.getElementById('restorePurchasesBtn');
     if (restorePurchasesBtn) {
         restorePurchasesBtn.addEventListener('click', restorePurchases);
-    } else {
-        console.error('Restore purchases button not found');
     }
 
     const restoreCustomersBtn = document.getElementById('restoreCustomersBtn');
     if (restoreCustomersBtn) {
         restoreCustomersBtn.addEventListener('click', restoreCustomers);
-    } else {
-        console.error('Restore customers button not found');
     }
 }
 

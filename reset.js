@@ -46,11 +46,9 @@ function confirmReset() {
         };
         
         clearRequest.onerror = (event) => {
-            console.error('Error clearing purchases:', event.target.error);
             showMessage('خطا در بازنشانی فروش‌ها. لطفاً دوباره تلاش کنید.', 'error');
         };
     } catch (error) {
-        console.error('Error in confirmReset:', error);
         showMessage('خطا در بازنشانی پایگاه داده. لطفاً دوباره تلاش کنید.', 'error');
     }
 }
@@ -76,8 +74,6 @@ function initReset() {
     const resetBtn = document.getElementById('resetBtn');
     if (resetBtn) {
         resetBtn.addEventListener('click', resetDatabase);
-    } else {
-        console.error('Reset button not found');
     }
 
     const confirmResetBtn = document.getElementById('confirmResetBtn');

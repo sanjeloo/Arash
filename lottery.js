@@ -4,10 +4,20 @@
 // Filter purchases by date range and category
 function filterPurchasesByDateRange(purchases, fromDate, toDate, category) {
     let filtered = purchases;
+    console.warn('[Filter] Starting filter with:', { 
+        totalPurchases: purchases.length, 
+        fromDate, 
+        toDate, 
+        category 
+    });
     
     // Filter by date range
     if (fromDate || toDate) {
-        filtered = filtered.filter(purchase => {
+        console.warn('[Filter] Applying date filter...');
+        const beforeDateFilter = filtered.length;
+        
+        let sampleLogged = false;
+        filtered = filtered.filter((purchase, index) => {
             const purchaseDate = new Date(purchase.date);
             purchaseDate.setHours(0, 0, 0, 0);
             
@@ -16,27 +26,77 @@ function filterPurchasesByDateRange(purchases, fromDate, toDate, category) {
                 from.setHours(0, 0, 0, 0);
                 const to = new Date(toDate);
                 to.setHours(23, 59, 59, 999);
-                return purchaseDate >= from && purchaseDate <= to;
+                
+                const isInRange = purchaseDate >= from && purchaseDate <= to;
+                
+                // Log first few comparisons as sample
+                if (!sampleLogged && index < 3) {
+                    console.warn('[Filter] Sample date comparison:', {
+                        purchaseDate: purchaseDate.toISOString(),
+                        from: from.toISOString(),
+                        to: to.toISOString(),
+                        isInRange
+                    });
+                    if (index === 2) sampleLogged = true;
+                }
+                
+                return isInRange;
             } else if (fromDate) {
                 const from = new Date(fromDate);
                 from.setHours(0, 0, 0, 0);
-                return purchaseDate >= from;
+                const isInRange = purchaseDate >= from;
+                
+                if (!sampleLogged && index < 3) {
+                    console.warn('[Filter] Sample from date comparison:', {
+                        purchaseDate: purchaseDate.toISOString(),
+                        from: from.toISOString(),
+                        isInRange
+                    });
+                    if (index === 2) sampleLogged = true;
+                }
+                return isInRange;
             } else if (toDate) {
                 const to = new Date(toDate);
                 to.setHours(23, 59, 59, 999);
-                return purchaseDate <= to;
+                const isInRange = purchaseDate <= to;
+                
+                if (!sampleLogged && index < 3) {
+                    console.warn('[Filter] Sample to date comparison:', {
+                        purchaseDate: purchaseDate.toISOString(),
+                        to: to.toISOString(),
+                        isInRange
+                    });
+                    if (index === 2) sampleLogged = true;
+                }
+                return isInRange;
             }
             return true;
         });
+        
+        console.warn('[Filter] After date filter:', { 
+            before: beforeDateFilter, 
+            after: filtered.length 
+        });
+    } else {
+        console.warn('[Filter] No date filter applied');
     }
     
     // Filter by category
     if (category && category.trim() !== '') {
+        const beforeCategoryFilter = filtered.length;
         filtered = filtered.filter(purchase => {
             return purchase.category === category;
         });
+        console.warn('[Filter] After category filter:', { 
+            before: beforeCategoryFilter, 
+            after: filtered.length,
+            category
+        });
+    } else {
+        console.warn('[Filter] No category filter applied');
     }
     
+    console.warn('[Filter] Final filtered count:', filtered.length);
     return filtered;
 }
 
@@ -54,12 +114,23 @@ function runLottery() {
 
         request.onsuccess = () => {
             let purchases = request.result;
+            console.warn('[Lottery] Total purchases before filter:', purchases.length);
             
             // Apply date range and category filters
-            const fromDate = document.getElementById('lotteryFromDate')?.value || '';
-            const toDate = document.getElementById('lotteryToDate')?.value || '';
+            // Get Persian date strings and convert to Gregorian
+            const persianFromDate = document.getElementById('lotteryFromDate')?.value || '';
+            const persianToDate = document.getElementById('lotteryToDate')?.value || '';
+            console.warn('[Lottery] Persian dates from inputs:', { persianFromDate, persianToDate });
+            
+            const fromDate = persianFromDate ? getGregorianDateFromPersian(persianFromDate) : '';
+            const toDate = persianToDate ? getGregorianDateFromPersian(persianToDate) : '';
+            console.warn('[Lottery] Converted Gregorian dates:', { fromDate, toDate });
+            
             const category = document.getElementById('lotteryCategory')?.value || '';
+            console.warn('[Lottery] Category filter:', category);
+            
             purchases = filterPurchasesByDateRange(purchases, fromDate, toDate, category);
+            console.warn('[Lottery] Total purchases after filter:', purchases.length);
             
             if (purchases.length === 0) {
                 showMessage('فروشی یافت نشد. ابتدا چند فروش اضافه کنید.', 'error');
@@ -162,11 +233,9 @@ function runLottery() {
         };
 
         request.onerror = (event) => {
-            console.error('Error loading purchases for lottery:', event.target.error);
             showMessage('Error loading purchases for lottery', 'error');
         };
     } catch (error) {
-        console.error('Error in runLottery:', error);
         showMessage('Error running lottery. Please try again.', 'error');
     }
 }
@@ -222,7 +291,6 @@ function showLotteryResults(participants, winningCode, winner) {
     const lotteryBackdrop = document.getElementById('lotteryBackdrop');
     
     if (!lotteryDialog || !lotteryContainer) {
-        console.error('Lottery dialog elements not found');
         return;
     }
 
@@ -279,12 +347,22 @@ function initLottery() {
                 lotteryDialog.style.display = 'flex';
                 setTimeout(() => {
                     lotteryDialog.classList.add('show');
+                    console.log('[Lottery] Dialog shown, initializing date pickers...');
+                    // Ensure date pickers are initialized after dialog is visible
+                    setTimeout(() => {
+                        console.log('[Lottery] Checking initDatePicker function:', typeof initDatePicker);
+                        if (typeof initDatePicker === 'function') {
+                            console.log('[Lottery] Calling initDatePicker for lottery dates...');
+                            initDatePicker('lotteryFromDate');
+                            initDatePicker('lotteryToDate');
+                        } else {
+                            console.error('[Lottery] initDatePicker function not found!');
+                        }
+                    }, 50);
                 }, 10);
             }
             runLottery();
         });
-    } else {
-        console.error('Lottery button not found');
     }
 
     const closeLotteryBtn = document.getElementById('closeLotteryBtn');
@@ -315,8 +393,18 @@ function initLottery() {
     const clearFilterBtn = document.getElementById('clearLotteryFilter');
     if (clearFilterBtn) {
         clearFilterBtn.addEventListener('click', function() {
-            document.getElementById('lotteryFromDate').value = '';
-            document.getElementById('lotteryToDate').value = '';
+            const lotteryFromDateEl = document.getElementById('lotteryFromDate');
+            const lotteryToDateEl = document.getElementById('lotteryToDate');
+            if (lotteryFromDateEl && $(lotteryFromDateEl).data('pDatepicker')) {
+                $(lotteryFromDateEl).pDatepicker('clear');
+            } else {
+                lotteryFromDateEl.value = '';
+            }
+            if (lotteryToDateEl && $(lotteryToDateEl).data('pDatepicker')) {
+                $(lotteryToDateEl).pDatepicker('clear');
+            } else {
+                lotteryToDateEl.value = '';
+            }
             document.getElementById('lotteryCategory').value = '';
             runLottery();
         });

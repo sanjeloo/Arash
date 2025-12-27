@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -132,11 +133,11 @@
             <div class="date-range-filter">
                 <div class="date-range-item">
                     <label for="summaryFromDate">از تاریخ:</label>
-                    <input type="date" id="summaryFromDate" class="date-input">
+                    <input type="text" id="summaryFromDate" class="date-input persian-date-input">
                 </div>
                 <div class="date-range-item">
                     <label for="summaryToDate">تا تاریخ:</label>
-                    <input type="date" id="summaryToDate" class="date-input">
+                    <input type="text" id="summaryToDate" class="date-input persian-date-input">
                 </div>
                 <div class="date-range-item">
                     <label for="summaryCategory">دسته‌بندی:</label>
@@ -166,11 +167,11 @@
             <div class="date-range-filter">
                 <div class="date-range-item">
                     <label for="lotteryFromDate">از تاریخ:</label>
-                    <input type="date" id="lotteryFromDate" class="date-input">
+                    <input type="text" id="lotteryFromDate" class="date-input persian-date-input">
                 </div>
                 <div class="date-range-item">
                     <label for="lotteryToDate">تا تاریخ:</label>
-                    <input type="date" id="lotteryToDate" class="date-input">
+                    <input type="text" id="lotteryToDate" class="date-input persian-date-input">
                 </div>
                 <div class="date-range-item">
                     <label for="lotteryCategory">دسته‌بندی:</label>
@@ -222,11 +223,15 @@
         </div>
     </div>
 
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/persian-date@1.1.0/dist/persian-date.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js"></script>
     <script src="script.js"></script>
     <script src="summary.js"></script>
     <script src="lottery.js"></script>
     <script src="reset.js"></script>
     <script src="backup.js"></script>
     <script src="menu.js"></script>
+    <script src="persian-datepicker-init.js"></script>
 </body>
 </html>

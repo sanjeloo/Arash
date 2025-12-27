@@ -12,7 +12,7 @@ const CUSTOMER_STORE_NAME = 'customers';
 const request = indexedDB.open(DB_NAME, DB_VERSION);
 
 request.onerror = (event) => {
-    console.error('Database error:', event.target.error);
+    // Database error handled silently
 };
 
 request.onsuccess = (event) => {
@@ -33,7 +33,7 @@ request.onupgradeneeded = (event) => {
 const customerRequest = indexedDB.open(CUSTOMER_DB_NAME, CUSTOMER_DB_VERSION);
 
 customerRequest.onerror = (event) => {
-    console.error('Customer database error:', event.target.error);
+    // Customer database error handled silently
 };
 
 customerRequest.onsuccess = (event) => {
@@ -255,7 +255,6 @@ document.getElementById('purchaseForm').addEventListener('submit', function(e) {
             };
             
             customerRequest.onerror = () => {
-                console.error('Error saving customer info');
                 // Still show success for purchase even if customer save fails
                 showMessage('فروش با موفقیت افزوده شد!', 'success');
                 document.getElementById('purchaseForm').reset();
