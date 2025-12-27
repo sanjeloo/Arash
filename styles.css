@@ -783,11 +783,6 @@ select {
     white-space: nowrap;
 }
 
-.persian-date-input {
-    cursor: pointer;
-    background-color: white;
-}
-
 .date-input {
     padding: 8px 12px;
     border: 2px solid #e0e0e0;
@@ -795,6 +790,13 @@ select {
     font-size: 14px;
     transition: all 0.3s ease;
     outline: none;
+    cursor: pointer;
+}
+
+/* Persian Date Picker z-index fix */
+.pdp-container,
+.pdp-calendar {
+    z-index: 10001 !important;
 }
 
 .date-input:focus {

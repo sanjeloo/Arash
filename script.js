@@ -109,6 +109,7 @@ function searchCustomerNames(searchTerm) {
         // Filter customers that match the search term
         const matches = customers
             .filter(customer => {
+                if (!customer || !customer.customerName) return false;
                 const nameLower = customer.customerName.toLowerCase();
                 return nameLower.includes(searchLower);
             })
@@ -628,7 +629,12 @@ function loadPurchases() {
         };
 
         container.innerHTML = purchases.map(purchase => {
-            const date = new Date(purchase.date).toLocaleDateString();
+            // Format date for display in Persian
+            const purchaseDate = new Date(purchase.date);
+            const formattedDate = typeof gregorianDateToPersian === 'function' 
+                ? gregorianDateToPersian(purchaseDate) 
+                : purchaseDate.toLocaleDateString();
+            
             const formattedPrice = Math.round(purchase.price).toLocaleString('en-US');
             const phoneDisplay = purchase.phoneNumber ? ` - ${purchase.phoneNumber}` : '';
             const category = purchase.category || '';
@@ -651,8 +657,6 @@ function loadPurchases() {
                 dataAttributes = `data-category-color="${color1}"`;
             }
             const explanationDisplay = purchase.explanation ? `<div class="purchase-explanation">${purchase.explanation}</div>` : '';
-            const dateParts = date.split('/');
-            const formattedDate = dateParts.length === 3 ? `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}` : date;
             return `
                 <div class="${itemClass}" data-purchase-id="${purchase.id}" style="${rowStyle}" ${dataAttributes}>
                     <div class="purchase-info">

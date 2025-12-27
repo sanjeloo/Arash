@@ -1,23 +1,14 @@
 // Customer Purchase Summary functionality
 // Note: STORE_NAME and db are defined in script.js and accessible globally
+// Date picker functions are in persian-datepicker.js
 
 // Filter purchases by date range and category
 function filterPurchasesByDateRange(purchases, fromDate, toDate, category) {
     let filtered = purchases;
-    console.warn('[Filter] Starting filter with:', { 
-        totalPurchases: purchases.length, 
-        fromDate, 
-        toDate, 
-        category 
-    });
     
     // Filter by date range
     if (fromDate || toDate) {
-        console.warn('[Filter] Applying date filter...');
-        const beforeDateFilter = filtered.length;
-        
-        let sampleLogged = false;
-        filtered = filtered.filter((purchase, index) => {
+        filtered = filtered.filter((purchase) => {
             const purchaseDate = new Date(purchase.date);
             purchaseDate.setHours(0, 0, 0, 0);
             
@@ -26,77 +17,27 @@ function filterPurchasesByDateRange(purchases, fromDate, toDate, category) {
                 from.setHours(0, 0, 0, 0);
                 const to = new Date(toDate);
                 to.setHours(23, 59, 59, 999);
-                
-                const isInRange = purchaseDate >= from && purchaseDate <= to;
-                
-                // Log first few comparisons as sample
-                if (!sampleLogged && index < 3) {
-                    console.warn('[Filter] Sample date comparison:', {
-                        purchaseDate: purchaseDate.toISOString(),
-                        from: from.toISOString(),
-                        to: to.toISOString(),
-                        isInRange
-                    });
-                    if (index === 2) sampleLogged = true;
-                }
-                
-                return isInRange;
+                return purchaseDate >= from && purchaseDate <= to;
             } else if (fromDate) {
                 const from = new Date(fromDate);
                 from.setHours(0, 0, 0, 0);
-                const isInRange = purchaseDate >= from;
-                
-                if (!sampleLogged && index < 3) {
-                    console.warn('[Filter] Sample from date comparison:', {
-                        purchaseDate: purchaseDate.toISOString(),
-                        from: from.toISOString(),
-                        isInRange
-                    });
-                    if (index === 2) sampleLogged = true;
-                }
-                return isInRange;
+                return purchaseDate >= from;
             } else if (toDate) {
                 const to = new Date(toDate);
                 to.setHours(23, 59, 59, 999);
-                const isInRange = purchaseDate <= to;
-                
-                if (!sampleLogged && index < 3) {
-                    console.warn('[Filter] Sample to date comparison:', {
-                        purchaseDate: purchaseDate.toISOString(),
-                        to: to.toISOString(),
-                        isInRange
-                    });
-                    if (index === 2) sampleLogged = true;
-                }
-                return isInRange;
+                return purchaseDate <= to;
             }
             return true;
         });
-        
-        console.warn('[Filter] After date filter:', { 
-            before: beforeDateFilter, 
-            after: filtered.length 
-        });
-    } else {
-        console.warn('[Filter] No date filter applied');
     }
     
     // Filter by category
     if (category && category.trim() !== '') {
-        const beforeCategoryFilter = filtered.length;
         filtered = filtered.filter(purchase => {
             return purchase.category === category;
         });
-        console.warn('[Filter] After category filter:', { 
-            before: beforeCategoryFilter, 
-            after: filtered.length,
-            category
-        });
-    } else {
-        console.warn('[Filter] No category filter applied');
     }
     
-    console.warn('[Filter] Final filtered count:', filtered.length);
     return filtered;
 }
 
@@ -114,23 +55,22 @@ function showSummary() {
 
         request.onsuccess = () => {
             let purchases = request.result;
-            console.warn('[Summary] Total purchases before filter:', purchases.length);
             
             // Apply date range and category filters
-            // Get Persian date strings and convert to Gregorian
             const persianFromDate = document.getElementById('summaryFromDate')?.value || '';
             const persianToDate = document.getElementById('summaryToDate')?.value || '';
-            console.warn('[Summary] Persian dates from inputs:', { persianFromDate, persianToDate });
             
-            const fromDate = persianFromDate ? getGregorianDateFromPersian(persianFromDate) : '';
-            const toDate = persianToDate ? getGregorianDateFromPersian(persianToDate) : '';
-            console.warn('[Summary] Converted Gregorian dates:', { fromDate, toDate });
+            // Convert Persian dates to Gregorian for filtering
+            const fromDate = persianFromDate && typeof getGregorianDateFromPersian === 'function' 
+                ? getGregorianDateFromPersian(persianFromDate) 
+                : '';
+            const toDate = persianToDate && typeof getGregorianDateFromPersian === 'function' 
+                ? getGregorianDateFromPersian(persianToDate) 
+                : '';
             
             const category = document.getElementById('summaryCategory')?.value || '';
-            console.warn('[Summary] Category filter:', category);
             
             purchases = filterPurchasesByDateRange(purchases, fromDate, toDate, category);
-            console.warn('[Summary] Total purchases after filter:', purchases.length);
             
             const summaryContainer = document.getElementById('summaryContainer');
             const summarySection = document.getElementById('summarySection');
@@ -231,18 +171,10 @@ function initSummary() {
                 summarySection.style.display = 'flex';
                 setTimeout(() => {
                     summarySection.classList.add('show');
-                    console.log('[Summary] Dialog shown, initializing date pickers...');
-                    // Ensure date pickers are initialized after dialog is visible
+                    // Initialize date pickers after dialog is visible
                     setTimeout(() => {
-                        console.log('[Summary] Checking initDatePicker function:', typeof initDatePicker);
-                        if (typeof initDatePicker === 'function') {
-                            console.log('[Summary] Calling initDatePicker for summary dates...');
-                            initDatePicker('summaryFromDate');
-                            initDatePicker('summaryToDate');
-                        } else {
-                            console.error('[Summary] initDatePicker function not found!');
-                        }
-                    }, 50);
+                        initSummaryDatePickers();
+                    }, 100);
                 }, 10);
             }
             showSummary();
@@ -279,15 +211,17 @@ function initSummary() {
         clearFilterBtn.addEventListener('click', function() {
             const summaryFromDateEl = document.getElementById('summaryFromDate');
             const summaryToDateEl = document.getElementById('summaryToDate');
-            if (summaryFromDateEl && $(summaryFromDateEl).data('pDatepicker')) {
-                $(summaryFromDateEl).pDatepicker('clear');
-            } else {
+            if (summaryFromDateEl) {
                 summaryFromDateEl.value = '';
+                if ($(summaryFromDateEl).data('pDatepicker')) {
+                    $(summaryFromDateEl).pDatepicker('setDate', null);
+                }
             }
-            if (summaryToDateEl && $(summaryToDateEl).data('pDatepicker')) {
-                $(summaryToDateEl).pDatepicker('clear');
-            } else {
+            if (summaryToDateEl) {
                 summaryToDateEl.value = '';
+                if ($(summaryToDateEl).data('pDatepicker')) {
+                    $(summaryToDateEl).pDatepicker('setDate', null);
+                }
             }
             document.getElementById('summaryCategory').value = '';
             showSummary();
@@ -305,6 +239,19 @@ function initSummary() {
                         summarySection.style.display = 'none';
                         backdrop.style.display = 'none';
                     }, 300);
+                }
+            }
+        });
+    }
+}
+
+// Initialize date pickers for summary dialog
+function initSummaryDatePickers() {
+    if (typeof initPersianDatePickers === 'function') {
+        initPersianDatePickers(['summaryFromDate', 'summaryToDate'], {
+            calendar: {
+                persian: {
+                    leapYearMode: 'astronomical'
                 }
             }
         });
