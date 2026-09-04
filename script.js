@@ -707,6 +707,7 @@ function loadPurchases(reset = false) {
         displayedCount = 0;
         cursorPosition = null;
         hasMoreRecords = true;
+        isLoading = false;
         container.innerHTML = '';
     }
     
@@ -748,6 +749,12 @@ function loadNextBatchFromDB() {
             // No more records
             hasMoreRecords = false;
             isLoading = false;
+            
+            // Render any remaining records in the partial batch
+            if (batch.length > 0) {
+                renderBatch(batch);
+                return;
+            }
             
             // If we haven't displayed anything, show empty message
             if (displayedCount === 0) {
